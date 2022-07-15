@@ -1,0 +1,26 @@
+{
+    "name": "mehedimi/wp-query-builder",
+    "description": "A database query builder for WordPress",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Mehedi\\WPQueryBuilder\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Mehedi\\WPQueryBuilderTests\\": "tests/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Mehedi Hasan",
+            "email": "mehedihasansabbirmi@gmail.com"
+        }
+    ],
+    "require-dev": {
+        "phpunit/phpunit": "^9.5",
+        "symfony/var-dumper": "^5.4",
+        "mockery/mockery": "^1.5"
+    }
+}

@@ -8,12 +8,24 @@ class Grammar
 {
     use Singleton;
 
+    /**
+     * The components that make up a select clause.
+     *
+     * @var string[]
+     */
     protected $selectComponents = [
         'aggregate',
         'columns',
         'from',
+        'limit',
+        'offset',
     ];
 
+    /**
+     * Booting grammar instance
+     *
+     * @return void
+     */
     public function boot()
     {
         global $wpdb;
@@ -21,6 +33,12 @@ class Grammar
         WPDB::set($wpdb);
     }
 
+    /**
+     * Compile a select query into SQL.
+     *
+     * @param Builder $builder
+     * @return string
+     */
     public function compileSelectComponents(Builder $builder)
     {
         $sql = ['select' . ($builder->distinct ? ' distinct' : '')];
@@ -38,11 +56,35 @@ class Grammar
         return implode(' ', array_filter($sql));
     }
 
+    /**
+     * Convert an array of column names into a delimited string.
+     *
+     * @param array $columns
+     * @return string
+     */
+    public function columnize(array $columns)
+    {
+        return implode(', ', $columns);
+    }
+
+    /**
+     * Compile an aggregated select clause.
+     *
+     * @param $aggregate
+     * @return string
+     */
     protected function compileAggregate($aggregate)
     {
         return sprintf('%s(%s) as aggregate', $aggregate[0], $aggregate[1]);
     }
 
+    /**
+     * Compile the "select *" portion of the query.
+     *
+     * @param $columns
+     * @param Builder $builder
+     * @return bool|mixed|string|null
+     */
     protected function compileColumns($columns, Builder $builder)
     {
         if (isset($builder->aggregate) && $columns === '*') {
@@ -60,6 +102,12 @@ class Grammar
         return $this->columnize($columns);
     }
 
+    /**
+     * Compile the "from" portion of the query.
+     *
+     * @param $from
+     * @return string
+     */
     protected function compileFrom($from)
     {
         global $wpdb;
@@ -67,8 +115,25 @@ class Grammar
         return 'from ' . $wpdb->prefix . $from;
     }
 
-    public function columnize(array $columns)
+    /**
+     * Compile the "limit" portions of the query.
+     *
+     * @param $limit
+     * @return string
+     */
+    protected function compileLimit($limit)
     {
-        return implode(', ', $columns);
+        return 'limit ' . $limit;
+    }
+
+    /**
+     * Compile the "offset" portions of the query.
+     *
+     * @param $offset
+     * @return string
+     */
+    public function compileOffset($offset)
+    {
+        return 'offset ' . $offset;
     }
 }

@@ -2,27 +2,64 @@
 
 namespace Mehedi\WPQueryBuilder\Query;
 
+use BadMethodCallException;
+
+/**
+ * @method static prepare($query)
+ * @method static get_results($query)
+ */
 class WPDB
 {
+    /**
+     * $wpdb object instance
+     *
+     * @var $wpdb
+     */
     protected static $wpdb;
 
+    /**
+     * Allowed method names
+     *
+     * @var string $passThrough
+     */
+    protected static $passThrough = '/prepare|get_results/';
+
+    /**
+     * Set $wpdb object
+     *
+     * @param $wpdb
+     * @return void
+     */
     public static function set($wpdb)
     {
         self::$wpdb = $wpdb;
     }
 
+    /**
+     * Get $wpdb object instance
+     *
+     * @return object
+     */
     public static function get()
     {
         return self::$wpdb;
     }
 
-    public static function prepare($query)
+    /**
+     * Handling dynamic method invoking from $wpdb object
+     *
+     * @param $name
+     * @param $arguments
+     * @return mixed
+     */
+    public static function __callStatic($name, $arguments)
     {
-        return self::$wpdb->prepare($query);
-    }
+        if (preg_match(self::$passThrough, $name)) {
+            return call_user_func([self::$wpdb, $name], ...$arguments);
+        }
 
-    public static function get_results($query)
-    {
-        return self::$wpdb->get_results($query);
+        throw new BadMethodCallException(
+            sprintf('Call to undefined method %s::%s', self::class, $name)
+        );
     }
 }

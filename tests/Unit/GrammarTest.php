@@ -16,6 +16,11 @@ use Mockery as m;
 
 class GrammarTest extends TestCase
 {
+    function getBuilder()
+    {
+        return new \Mehedi\WPQueryBuilder\Query\Builder(\Mehedi\WPQueryBuilder\Query\Grammar::getInstance());
+    }
+
     /**
      * @test
      */
@@ -78,8 +83,40 @@ class GrammarTest extends TestCase
             ->aggregate('sum', 'total');
     }
 
-    public function getBuilder()
-    {
-        return new \Mehedi\WPQueryBuilder\Query\Builder(\Mehedi\WPQueryBuilder\Query\Grammar::getInstance());
+    /**
+     * @test
+     */
+    function it_can_compile_limit() {
+        $sql = $this->getBuilder()
+            ->from('posts')
+            ->limit(4)
+            ->toSQL();
+
+        $this->assertEquals('select * from wp_posts limit 4', $sql);
+    }
+
+    /**
+     * @test
+     */
+    function it_can_compile_offset() {
+        $sql = $this->getBuilder()
+            ->from('posts')
+            ->offset(4)
+            ->toSQL();
+
+        $this->assertEquals('select * from wp_posts offset 4', $sql);
+    }
+
+    /**
+     * @test
+     */
+    function it_can_compile_offset_limit() {
+        $sql = $this->getBuilder()
+            ->from('posts')
+            ->offset(4)
+            ->limit(5)
+            ->toSQL();
+
+        $this->assertEquals('select * from wp_posts limit 5 offset 4', $sql);
     }
 }

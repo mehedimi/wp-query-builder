@@ -1,15 +1,17 @@
 <?php
 
-use Mehedi\WPQueryBuilder\Query\Grammar;
-use Mehedi\WPQueryBuilderTests\FakeWPDB;
+namespace Mehedi\WPQueryBuilderTests\Unit;
+
 use PHPUnit\Framework\TestCase;
+use Mehedi\WPQueryBuilderTests\FakeWPDB;
 
 class BuilderTest extends TestCase
 {
     /**
      * @test
      */
-    function it_can_set_table_name() {
+    function it_can_set_table_name()
+    {
         $b = $this->builder();
 
         $this->assertInstanceOf(get_class($b), $b->from('posts'));
@@ -20,7 +22,8 @@ class BuilderTest extends TestCase
     /**
      * @test
      */
-    function it_can_set_columns() {
+    function it_can_set_columns()
+    {
         $b = $this->builder();
 
         $this->assertInstanceOf(get_class($b), $b->select('*'));
@@ -33,7 +36,8 @@ class BuilderTest extends TestCase
     /**
      * @test
      */
-    function it_can_set_distinct() {
+    function it_can_set_distinct()
+    {
         $b = $this->builder();
 
         $this->assertNull($b->distinct);
@@ -45,7 +49,8 @@ class BuilderTest extends TestCase
     /**
      * @test
      */
-    function it_can_set_table_alias() {
+    function it_can_set_table_alias()
+    {
         $b = $this->builder();
 
         $b->from('post', 'p');
@@ -56,7 +61,8 @@ class BuilderTest extends TestCase
     /**
      * @test
      */
-    function it_can_set_aggregate_function() {
+    function it_can_set_aggregate_function()
+    {
         $b = $this->builder();
 
         FakeWPDB::add('prepare', function ($sql) {
@@ -76,7 +82,36 @@ class BuilderTest extends TestCase
         $this->assertEquals(['sum', 'total + amount'], $b->aggregate);
     }
 
-    function builder() {
+    function builder()
+    {
         return new \Mehedi\WPQueryBuilder\Query\Builder(\Mehedi\WPQueryBuilder\Query\Grammar::getInstance());
+    }
+
+    /**
+     * @test
+     */
+    function it_can_set_limit()
+    {
+        $b = $this->builder();
+
+        $this->assertNull($b->limit);
+        $b->limit(null);
+        $this->assertEquals(0, $b->limit);
+        $this->assertInstanceOf(get_class($b), $b->limit('4'));
+        $this->assertEquals(4, $b->limit);
+    }
+
+    /**
+     * @test
+     */
+    function it_can_set_offset()
+    {
+        $b = $this->builder();
+
+        $this->assertNull($b->offset);
+        $b->offset(null);
+        $this->assertEquals(0, $b->offset);
+        $this->assertInstanceOf(get_class($b), $b->offset('4'));
+        $this->assertEquals(4, $b->offset);
     }
 }

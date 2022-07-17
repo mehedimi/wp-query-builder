@@ -417,4 +417,33 @@ class GrammarTest extends TestCase
             ->whereNotNull('deleted_at')
             ->delete();
     }
+
+    /**
+     * @test
+     */
+    function it_can_able_to_fetch_only_first_record()
+    {
+        $this->initFakeDB();
+
+        FakeWPDB::add('get_row', function ($sql) {
+        });
+
+        FakeWPDB::add('prepare', function ($sql) {
+            $this->assertEquals('select * from wp_posts limit 1', $sql);
+        });
+
+        $this->getBuilder()
+            ->from('posts')
+            ->first();
+
+        FakeWPDB::add('prepare', function ($sql, ...$args) {
+            $this->assertEquals('select * from wp_posts where ID = %d limit 1', $sql);
+            $this->assertEquals([2], $args);
+        });
+
+        $this->getBuilder()
+            ->from('posts')
+            ->where('ID', 2)
+            ->first();
+    }
 }

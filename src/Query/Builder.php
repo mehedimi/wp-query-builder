@@ -245,11 +245,18 @@ class Builder
         return WPDB::get_results($query);
     }
 
+    /**
+     * Execute the query and get the first result.
+     *
+     * @return mixed
+     */
     public function first()
     {
         $sql = $this->limit(1)->toSQL();
 
+        $query = WPDB::prepare($sql, ...$this->bindings['where']);
 
+        return WPDB::get_row($query, ...func_get_args());
     }
 
     /**

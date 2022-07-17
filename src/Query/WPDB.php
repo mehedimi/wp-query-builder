@@ -8,6 +8,7 @@ use BadMethodCallException;
  * @method static prepare($query, ...$args)
  * @method static get_results($query)
  * @method static query($query)
+ * @method static get_row($query)
  */
 class WPDB
 {
@@ -23,7 +24,7 @@ class WPDB
      *
      * @var string $passThrough
      */
-    protected static $passThrough = '/prepare|get_results|query/';
+    protected static $passThrough = '/prepare|get_(results|row)|query|/';
 
     /**
      * Set $wpdb object

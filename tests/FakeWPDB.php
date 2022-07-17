@@ -6,6 +6,8 @@ class FakeWPDB
 {
     static $methods = [];
 
+    public $prefix = 'wp_';
+
     static function add($name, $callback) {
         self::$methods[$name] = $callback;
     }

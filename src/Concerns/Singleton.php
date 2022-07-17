@@ -4,6 +4,11 @@ namespace Mehedi\WPQueryBuilder\Concerns;
 
 trait Singleton
 {
+    /**
+     * Store single instance of current class
+     *
+     * @var static
+     */
     protected static $instance;
 
     /**

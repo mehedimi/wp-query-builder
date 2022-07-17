@@ -5,8 +5,9 @@ namespace Mehedi\WPQueryBuilder\Query;
 use BadMethodCallException;
 
 /**
- * @method static prepare($query)
+ * @method static prepare($query, ...$args)
  * @method static get_results($query)
+ * @method static query($query)
  */
 class WPDB
 {
@@ -22,7 +23,7 @@ class WPDB
      *
      * @var string $passThrough
      */
-    protected static $passThrough = '/prepare|get_results/';
+    protected static $passThrough = '/prepare|get_results|query/';
 
     /**
      * Set $wpdb object
@@ -43,6 +44,16 @@ class WPDB
     public static function get()
     {
         return self::$wpdb;
+    }
+
+    /**
+     * Get table prefix from $wpdb object
+     *
+     * @return string
+     */
+    public static function prefix()
+    {
+        return self::$wpdb->prefix;
     }
 
     /**

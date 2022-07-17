@@ -1,6 +1,6 @@
 # WP Query Builder
 
-WP Query Builder is package for developers which can simplify your query writing experience in WordPress.
+WP Query Builder is package for developers, which can simplify query writing experience in WordPress.
 
 ## Installation
 ```shell
@@ -38,5 +38,30 @@ DB::table('posts')->whereBetween('comment_count', [1, 100])->get();
 ### Inserting data
 ```php
 <?php
+DB::table('posts')->insert([
+  'title' => 'The title',
+  'content' => 'The content'
+]);
+```
 
+### Updating data
+
+```php
+<?php
+
+DB::table('posts')
+  ->where('ID', 4)
+  ->update([
+    'title' => 'Title',
+    'content' => null
+  ])
+```
+
+### Deleting data
+```php
+<?php
+
+DB::table('posts')
+  ->where('ID', 4)
+  ->delete()
 ```

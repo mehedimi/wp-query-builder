@@ -18,6 +18,7 @@ class Grammar
         'columns',
         'from',
         'wheres',
+        'orders',
         'limit',
         'offset',
     ];
@@ -374,5 +375,19 @@ class Grammar
         $where = $this->compileWheres($builder);
 
         return trim("delete from $table $where");
+    }
+
+    /**
+     * Compile the "order by" portions of the query.
+     *
+     * @param Builder $builder
+     * @param $orders
+     * @return string
+     */
+    protected function compileOrders(Builder $builder, $orders)
+    {
+        return 'order by ' . implode(', ', array_map(function ($order) {
+            return "{$order['column']} {$order['direction']}";
+        }, $orders));
     }
 }

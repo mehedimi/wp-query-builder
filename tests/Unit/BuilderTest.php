@@ -2,6 +2,7 @@
 
 namespace Mehedi\WPQueryBuilderTests\Unit;
 
+use Mehedi\WPQueryBuilder\Query\Builder;
 use PHPUnit\Framework\TestCase;
 use Mehedi\WPQueryBuilderTests\FakeWPDB;
 
@@ -414,5 +415,18 @@ class BuilderTest extends TestCase
     function it_should_have_first_method()
     {
         $this->assertEquals(true, method_exists($this->builder(), 'first'));
+    }
+
+    /**
+     * @test
+     */
+    function it_can_use_order_by_clause()
+    {
+        $builder = $this->builder()
+            ->from('posts')
+            ->orderBy('ID');
+
+        $this->assertInstanceOf(Builder::class, $builder);
+        $this->assertEquals(['column' => 'ID', 'direction' => 'asc'], $builder->orders[0]);
     }
 }

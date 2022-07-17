@@ -446,4 +446,25 @@ class GrammarTest extends TestCase
             ->where('ID', 2)
             ->first();
     }
+
+    /**
+     * @test
+     */
+    function it_can_compile_order_by_clause()
+    {
+        $sql = $this->getBuilder()
+            ->from('posts')
+            ->orderBy('date_created')
+            ->toSQL();
+
+        $this->assertEquals('select * from wp_posts order by date_created asc', $sql);
+
+        $sql = $this->getBuilder()
+            ->from('posts')
+            ->orderBy('date_created')
+            ->where('ID', '>', 100)
+            ->toSQL();
+
+        $this->assertEquals('select * from wp_posts where ID > %d order by date_created asc', $sql);
+    }
 }

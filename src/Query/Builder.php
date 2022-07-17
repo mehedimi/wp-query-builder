@@ -77,6 +77,13 @@ class Builder
     public $wheres = [];
 
     /**
+     * The orderings for the query.
+     *
+     * @var array
+     */
+    public $orders;
+
+    /**
      * The current query value bindings.
      *
      * @var array
@@ -88,11 +95,11 @@ class Builder
     /**
      * Create a new query builder instance.
      *
-     * @param Grammar $grammar
+     * @param Grammar|null $grammar
      */
-    public function __construct(Grammar $grammar)
+    public function __construct(Grammar $grammar = null)
     {
-        $this->grammar = $grammar;
+        $this->grammar = $grammar ?: Grammar::getInstance();
     }
 
     /**
@@ -526,5 +533,19 @@ class Builder
         return WPDB::query(
             WPDB::prepare($this->grammar->compileDelete($this), ...$this->bindings['where'])
         );
+    }
+
+    /**
+     * Add an "order by" clause to the query.
+     *
+     * @param $column
+     * @param $direction
+     * @return $this
+     */
+    public function orderBy($column, $direction = 'asc')
+    {
+        $this->orders[] = compact('column', 'direction');
+
+        return $this;
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Mehedi\WPQueryBuilder\Query;
 
+use Closure;
 use InvalidArgumentException;
 
 class Builder
@@ -84,12 +85,20 @@ class Builder
     public $orders;
 
     /**
+     * The table joins for the query.
+     *
+     * @var array
+     */
+    public $joins;
+
+    /**
      * The current query value bindings.
      *
      * @var array
      */
     public $bindings = [
         'where' => [],
+        'join' => []
     ];
 
     /**
@@ -313,7 +322,7 @@ class Builder
     /**
      * Add an "or where" clause to the query.
      *
-     * @param \Closure|string|array $column
+     * @param Closure|string|array $column
      * @param mixed $operator
      * @param mixed $value
      * @return $this
@@ -547,5 +556,63 @@ class Builder
         $this->orders[] = compact('column', 'direction');
 
         return $this;
+    }
+
+    /**
+     * Add a "where" clause comparing two columns to the query.
+     *
+     * @return $this
+     */
+    public function whereColumn($first, $operator = null, $second = null, $boolean = 'and')
+    {
+        $type = 'Column';
+
+        list($second, $operator) = $this->prepareValueAndOperator(
+            $second, $operator, func_num_args() === 2
+        );
+
+        $this->wheres[] = compact('type', 'first', 'operator', 'second', 'boolean');
+
+        return $this;
+    }
+
+    /**
+     * Add a join clause to the query.
+     *
+     * @param $table
+     * @param $first
+     * @param $operator
+     * @param $second
+     * @param $type
+     * @return $this
+     */
+    public function join($table, $first = null, $operator = null, $second = null, $type = 'inner')
+    {
+        $join = new Join($table, $type);
+
+        if ($first instanceof Closure) {
+            $first($join);
+        } else {
+            $join->on($first, $operator, $second);
+        }
+
+        $this->joins[] = $join;
+        $this->addBinding(
+            $join->getBindings(), 'join'
+        );
+
+        return $this;
+    }
+
+    /**
+     * Get the current query value bindings in a flattened array.
+     *
+     * @return array
+     */
+    public function getBindings()
+    {
+        return array_reduce($this->bindings, function ($bindings, $binding) {
+            return array_merge($bindings, array_values($binding));
+        }, []);
     }
 }

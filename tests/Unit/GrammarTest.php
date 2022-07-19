@@ -3,6 +3,7 @@
 namespace Mehedi\WPQueryBuilderTests\Unit;
 
 use Mehedi\WPQueryBuilder\Query\Grammar;
+use Mehedi\WPQueryBuilder\Query\Join;
 use Mehedi\WPQueryBuilder\Query\WPDB;
 use Mehedi\WPQueryBuilderTests\FakeWPDB;
 use PHPUnit\Framework\TestCase;
@@ -466,5 +467,65 @@ class GrammarTest extends TestCase
             ->toSQL();
 
         $this->assertEquals('select * from wp_posts where ID > %d order by date_created asc', $sql);
+    }
+
+    /**
+     * @test
+     */
+    function it_can_compile_where_column_clause()
+    {
+        $sql = $this->getBuilder()
+            ->from('posts')
+            ->whereColumn('ID', 'post_id')
+            ->toSQL();
+
+        $this->assertEquals('select * from wp_posts where ID = post_id', $sql);
+
+        $sql = $this->getBuilder()
+            ->from('posts')
+            ->whereColumn('ID', '>', 'post_id')
+            ->toSQL();
+
+        $this->assertEquals('select * from wp_posts where ID > post_id', $sql);
+    }
+
+    /**
+     * @test
+     */
+    function it_can_compile_join_clause()
+    {
+        $sql = $this->getBuilder()
+            ->from('posts')
+            ->join('post_meta', 'posts.ID', '=', 'post_meta.post_id')
+            ->toSQL();
+
+        $this->assertEquals('select * from wp_posts inner join post_meta on posts.ID = post_meta.post_id', $sql);
+
+        $sql = $this->getBuilder()
+            ->select('posts.*')
+            ->from('posts')
+            ->join('post_meta', function (Join $join) {
+                $join->on( 'posts.ID', '=', 'post_meta.post_id');
+            })
+            ->toSQL();
+
+        $this->assertEquals('select posts.* from wp_posts inner join post_meta on posts.ID = post_meta.post_id', $sql);
+    }
+
+    /**
+     * @test
+     */
+    function it_can_compile_multiple_join_clause()
+    {
+        $sql = $this->getBuilder()
+            ->from('posts')
+            ->join('post_meta', 'posts.ID', '=', 'post_meta.post_id')
+            ->join('post_meta_meta as pmm', function (Join $join) {
+                $join->on('post_meta.ID', '=', 'pmm.pmm_id')
+                    ->where('pmm.type', 'hello');
+            })
+            ->toSQL();
+
+        $this->assertEquals('select * from wp_posts inner join post_meta on posts.ID = post_meta.post_id inner join post_meta_meta as pmm on post_meta.ID = pmm.pmm_id and pmm.type = %s', $sql);
     }
 }

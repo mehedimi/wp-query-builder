@@ -429,4 +429,29 @@ class BuilderTest extends TestCase
         $this->assertInstanceOf(Builder::class, $builder);
         $this->assertEquals(['column' => 'ID', 'direction' => 'asc'], $builder->orders[0]);
     }
+
+    /**
+     * @test
+     */
+    function it_can_set_where_columns()
+    {
+        $builder = $this->builder()
+            ->from('posts')
+            ->whereColumn('ID', 'post_id');
+
+        $this->assertCount(1, $builder->wheres);
+        $this->assertInstanceOf(Builder::class, $builder);
+    }
+
+    /**
+     * @test
+     */
+    function it_can_add_join_clause()
+    {
+        $builder = $this->builder()
+            ->from('posts')
+            ->join('post_meta', 'posts.ID', '=', 'post_mata.post_id');
+
+        $this->assertCount(1, $builder->joins);
+    }
 }

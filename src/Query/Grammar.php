@@ -17,6 +17,7 @@ class Grammar
         'aggregate',
         'columns',
         'from',
+        'joins',
         'wheres',
         'orders',
         'limit',
@@ -156,6 +157,7 @@ class Grammar
         }
 
         return $this->concatenateWhereClauses(
+            $builder,
             $this->compileWheresToArray($builder)
         );
     }
@@ -176,12 +178,13 @@ class Grammar
     /**
      * Format the where clause statements into one string.
      *
+     * @param Builder $builder
      * @param array $whereSegment
      * @return string
      */
-    protected function concatenateWhereClauses($whereSegment)
+    protected function concatenateWhereClauses($builder, $whereSegment)
     {
-        return 'where ' . $this->removeLeadingBoolean(
+        return ($builder instanceof Join ? 'on' : 'where') . ' ' . $this->removeLeadingBoolean(
                 implode(' ', $whereSegment)
             );
     }
@@ -387,7 +390,35 @@ class Grammar
     protected function compileOrders(Builder $builder, $orders)
     {
         return 'order by ' . implode(', ', array_map(function ($order) {
-            return "{$order['column']} {$order['direction']}";
-        }, $orders));
+                return "{$order['column']} {$order['direction']}";
+            }, $orders));
+    }
+
+    /**
+     * Compile a where clause comparing two columns.
+     *
+     * @return string
+     */
+    protected function whereColumn(Builder $builder, $where)
+    {
+        return "{$where['first']} {$where['operator']} {$where['second']}";
+    }
+
+    /**
+     * Compile the "join" portions of the query.
+     *
+     * @param Builder $builder
+     * @param $joins
+     * @return string
+     */
+    protected function compileJoins(Builder $builder, $joins)
+    {
+        return implode(' ', array_map(function (Join $join) use ($builder) {
+            $nestedJoins = is_null($join->joins) ? '' : ' ' . $this->compileJoins($builder, $join->joins);
+
+            $tableAndNestedJoins = is_null($join->joins) ? $join->table : '(' . $join->table . $nestedJoins . ')';
+
+            return "$join->type join $tableAndNestedJoins {$this->compileWheres($join)}";
+        }, $joins));
     }
 }

@@ -120,7 +120,7 @@ DB::table('users')
         })
         ->get();
 ```
-If you would like to use a "where" clause on your joins, you may use the `where` and `orWhere` methods provided by the `JoinClause` instance. Instead of comparing two columns, these methods will compare the column against a value:
+If you would like to use a "where" clause on your joins, you may use the `where` and `orWhere` methods provided by the `Join` instance. Instead of comparing two columns, these methods will compare the column against a value:
 ```php
 DB::table('users')
         ->join('contacts', function ($join) {

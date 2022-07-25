@@ -4,6 +4,7 @@ namespace Mehedi\WPQueryBuilder\Query;
 
 use Closure;
 use InvalidArgumentException;
+use Mehedi\WPQueryBuilder\Contracts\Mixin;
 
 class Builder
 {
@@ -102,6 +103,13 @@ class Builder
     ];
 
     /**
+     * The groupings for the query.
+     *
+     * @var array
+     */
+    public $groups;
+
+    /**
      * Create a new query builder instance.
      *
      * @param Grammar|null $grammar
@@ -115,12 +123,11 @@ class Builder
      * Set the table which the query is targeting.
      *
      * @param $table
-     * @param $as
      * @return $this
      */
-    public function from($table, $as = null)
+    public function from($table)
     {
-        $this->from = $as ? sprintf('%s as %s', $table, $as) : $table;
+        $this->from = $table;
         return $this;
     }
 
@@ -605,6 +612,34 @@ class Builder
     }
 
     /**
+     * Add a left join clause to the query
+     *
+     * @param $table
+     * @param $first
+     * @param $operator
+     * @param $second
+     * @return $this
+     */
+    public function leftJoin($table, $first = null, $operator = null, $second = null)
+    {
+        return $this->join($table, $first, $operator, $second, 'left');
+    }
+
+    /**
+     * Add a right join clause to the query
+     *
+     * @param $table
+     * @param $first
+     * @param $operator
+     * @param $second
+     * @return $this
+     */
+    public function rightJoin($table, $first = null, $operator = null, $second = null)
+    {
+        return $this->join($table, $first, $operator, $second, 'right');
+    }
+
+    /**
      * Get the current query value bindings in a flattened array.
      *
      * @return array
@@ -614,5 +649,32 @@ class Builder
         return array_reduce($this->bindings, function ($bindings, $binding) {
             return array_merge($bindings, array_values($binding));
         }, []);
+    }
+
+    /**
+     * Apply a mixin to builder class
+     *
+     * @param Mixin $mixin
+     * @return $this
+     */
+    public function mixin(Mixin $mixin)
+    {
+        $mixin->apply($this);
+
+        return $this;
+    }
+
+    /**
+     * Add a `group by` clause to query
+     *
+     * @param $column
+     * @param $direction
+     * @return Builder
+     */
+    public function groupBy($column, $direction = null)
+    {
+        $this->groups[] = [$column, $direction];
+
+        return $this;
     }
 }

@@ -19,6 +19,7 @@ class Grammar
         'from',
         'joins',
         'wheres',
+        'groups',
         'orders',
         'limit',
         'offset',
@@ -101,11 +102,7 @@ class Grammar
             return $builder->distinct;
         }
 
-        if (!is_array($columns)) {
-            return $columns;
-        }
-
-        return $this->columnize($columns);
+        return $this->withPrefixColumns($columns);
     }
 
     /**
@@ -209,7 +206,7 @@ class Grammar
      */
     protected function whereBasic(Builder $builder, $where)
     {
-        return "{$where['column']} {$where['operator']} " . $this->getValuePlaceholder($where['value']);
+        return "{$this->withPrefixColumns($where['column'])} {$where['operator']} " . $this->getValuePlaceholder($where['value']);
     }
 
     /**
@@ -242,7 +239,7 @@ class Grammar
     protected function whereIn(Builder $builder, $where)
     {
         if (!empty($where['values'])) {
-            return $where['column'] . ' in (' . implode(', ', array_map([$this, 'getValuePlaceholder'], $where['values'])) . ')';
+            return $this->withPrefixColumns($where['column']) . ' in (' . implode(', ', array_map([$this, 'getValuePlaceholder'], $where['values'])) . ')';
         }
 
         return '0 = 1';
@@ -258,7 +255,7 @@ class Grammar
     protected function whereNotIn(Builder $builder, $where)
     {
         if (!empty($where['values'])) {
-            return $where['column'] . ' not in (' . implode(', ', array_map([$this, 'getValuePlaceholder'], $where['values'])) . ')';
+            return $this->withPrefixColumns($where['column']) . ' not in (' . implode(', ', array_map([$this, 'getValuePlaceholder'], $where['values'])) . ')';
         }
 
         return '1 = 1';
@@ -273,7 +270,7 @@ class Grammar
      */
     protected function whereNull(Builder $builder, $where)
     {
-        return $where['column'] . ' is null';
+        return $this->withPrefixColumns($where['column']) . ' is null';
     }
 
     /**
@@ -285,7 +282,7 @@ class Grammar
      */
     protected function whereNotNull(Builder $builder, $where)
     {
-        return $where['column'] . ' is not null';
+        return $this->withPrefixColumns($where['column']) . ' is not null';
     }
 
     /**
@@ -299,7 +296,7 @@ class Grammar
     {
         $between = $where['not'] ? 'not between' : 'between';
 
-        return $where['column'] . ' ' . $between . ' ' . implode(' and ', array_map([$this, 'getValuePlaceholder'], $where['values']));
+        return $this->withPrefixColumns($where['column']) . ' ' . $between . ' ' . implode(' and ', array_map([$this, 'getValuePlaceholder'], $where['values']));
     }
 
     /**
@@ -401,7 +398,30 @@ class Grammar
      */
     protected function whereColumn(Builder $builder, $where)
     {
-        return "{$where['first']} {$where['operator']} {$where['second']}";
+        return "{$this->withPrefixColumns($where['first'])} {$where['operator']} {$this->withPrefixColumns($where['second'])}";
+    }
+
+    /**
+     * Wrap with table prefix
+     *
+     * @param $columns
+     * @return string
+     */
+    protected function withPrefixColumns($columns)
+    {
+        if (is_string($columns)) {
+            $columns = [$columns];
+        }
+
+        $columns = array_map(function ($column) {
+            if (strpos($column, '.') === false) {
+                return $column;
+            }
+
+            return $this->tableWithPrefix($column);
+        }, $columns);
+
+        return $this->columnize($columns);
     }
 
     /**
@@ -416,7 +436,7 @@ class Grammar
         return implode(' ', array_map(function (Join $join) use ($builder) {
             $nestedJoins = is_null($join->joins) ? '' : ' ' . $this->compileJoins($builder, $join->joins);
 
-            $tableAndNestedJoins = is_null($join->joins) ? $join->table : '(' . $join->table . $nestedJoins . ')';
+            $tableAndNestedJoins = is_null($join->joins) ? $this->tableWithPrefix($join->table) : '(' . $this->tableWithPrefix($join->table) . $nestedJoins . ')';
 
             return "$join->type join $tableAndNestedJoins {$this->compileWheres($join)}";
         }, $joins));

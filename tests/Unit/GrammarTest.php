@@ -69,8 +69,8 @@ class GrammarTest extends TestCase
      */
     function it_can_compile_table_alias()
     {
-        $sql = $this->getBuilder()->from('posts', 'p')->toSQL();
-        $this->assertEquals('select * from wp_posts as p', $sql);
+        $sql = $this->getBuilder()->from('posts')->toSQL();
+        $this->assertEquals('select * from wp_posts', $sql);
     }
 
     /**
@@ -499,7 +499,7 @@ class GrammarTest extends TestCase
             ->join('post_meta', 'posts.ID', '=', 'post_meta.post_id')
             ->toSQL();
 
-        $this->assertEquals('select * from wp_posts inner join post_meta on posts.ID = post_meta.post_id', $sql);
+        $this->assertEquals('select * from wp_posts inner join wp_post_meta on wp_posts.ID = wp_post_meta.post_id', $sql);
 
         $sql = $this->getBuilder()
             ->select('posts.*')
@@ -509,7 +509,7 @@ class GrammarTest extends TestCase
             })
             ->toSQL();
 
-        $this->assertEquals('select posts.* from wp_posts inner join post_meta on posts.ID = post_meta.post_id', $sql);
+        $this->assertEquals('select wp_posts.* from wp_posts inner join wp_post_meta on wp_posts.ID = wp_post_meta.post_id', $sql);
     }
 
     /**
@@ -520,12 +520,28 @@ class GrammarTest extends TestCase
         $sql = $this->getBuilder()
             ->from('posts')
             ->join('post_meta', 'posts.ID', '=', 'post_meta.post_id')
-            ->join('post_meta_meta as pmm', function (Join $join) {
-                $join->on('post_meta.ID', '=', 'pmm.pmm_id')
-                    ->where('pmm.type', 'hello');
+            ->join('post_meta_meta', function (Join $join) {
+                $join->on('post_meta.ID', '=', 'post_meta_meta.pmm_id')
+                    ->where('post_meta_meta.type', 'hello');
             })
             ->toSQL();
 
-        $this->assertEquals('select * from wp_posts inner join post_meta on posts.ID = post_meta.post_id inner join post_meta_meta as pmm on post_meta.ID = pmm.pmm_id and pmm.type = %s', $sql);
+        $this->assertEquals('select * from wp_posts inner join wp_post_meta on wp_posts.ID = wp_post_meta.post_id inner join wp_post_meta_meta on wp_post_meta.ID = wp_post_meta_meta.pmm_id and wp_post_meta_meta.type = %s', $sql);
+    }
+
+    /**
+     * @test
+     */
+    function it_can_compile_group_by()
+    {
+        $sql = $this->getBuilder()
+            ->from('posts')
+            ->groupBy('ID')
+            ->where('ID', '>', 10)
+            ->groupBy('post_id', 'asc')
+            ->limit(100)
+            ->toSQL();
+
+        $this->assertEquals('select * from wp_posts where  group by');
     }
 }

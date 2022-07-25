@@ -2,7 +2,10 @@
 
 namespace Mehedi\WPQueryBuilderTests\Unit;
 
+use Mehedi\WPQueryBuilder\DB;
+use Mehedi\WPQueryBuilder\Mixins\JoinPostWithMeta;
 use Mehedi\WPQueryBuilder\Query\Builder;
+use Mehedi\WPQueryBuilderTests\FakeMixin;
 use PHPUnit\Framework\TestCase;
 use Mehedi\WPQueryBuilderTests\FakeWPDB;
 
@@ -54,9 +57,9 @@ class BuilderTest extends TestCase
     {
         $b = $this->builder();
 
-        $b->from('post', 'p');
+        $b->from('post');
 
-        $this->assertEquals('post as p', $b->from);
+        $this->assertEquals('post', $b->from);
     }
 
     /**
@@ -453,5 +456,36 @@ class BuilderTest extends TestCase
             ->join('post_meta', 'posts.ID', '=', 'post_mata.post_id');
 
         $this->assertCount(1, $builder->joins);
+    }
+
+    /**
+     * @test
+     */
+    function it_can_add_mixin()
+    {
+        $i = false;
+
+        $callback = function () use (&$i) {
+            $i = true;
+        };
+
+        $builder = $this->builder()
+            ->from('posts')
+            ->mixin(new FakeMixin($callback));
+
+        $this->assertTrue($i);
+        $this->assertInstanceOf(Builder::class, $builder);
+    }
+
+    /**
+     * @test
+     */
+    function it_can_add_grouping_columns()
+    {
+        $builder = $this->builder()->groupBy('ID')->groupBy('post_id', 'asc');
+
+        $this->assertInstanceOf(Builder::class, $builder);
+        $this->assertCount(2, $builder->groups);
+        $this->assertEquals([['ID', null], ['post_id', 'asc']], $builder->groups);
     }
 }

@@ -21,15 +21,16 @@ class Join extends Builder
     /**
      * Create a new join clause instance.
      *
-     * @param $type
      * @param $table
+     * @param $type
+     * @param Grammar|null $grammar
      */
-    public function __construct($table, $type)
+    public function __construct($table, $type, Grammar $grammar = null)
     {
         $this->table = $table;
         $this->type = $type;
 
-        parent::__construct();
+        parent::__construct($grammar);
     }
 
     /**

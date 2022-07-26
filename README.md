@@ -7,11 +7,9 @@ WP Query Builder is package for developers, which can simplify query writing exp
     - [Retrieving All Rows From A Table](#retrieving-all-rows-from-a-table)
     - [Retrieving A Single Row](#retrieving-a-single-row)
     - [Aggregates](#aggregates)
-- [Select Statements](#select-statements)
 - [Joins](#joins)
 - [Basic Where Clauses](#basic-where-clauses)
     - [Where Clauses](#where-clauses)
-    - [Where Not Clauses](#where-not-clauses)
     - [Additional Where Clauses](#additional-where-clauses)
 - [Ordering, Grouping, Limit & Offset](#ordering-grouping-limit-and-offset)
     - [Ordering](#ordering)
@@ -174,8 +172,25 @@ $users = DB::table('users')
                     ->orWhere('name', 'John')
                     ->get();
 ```
-<a name="where-not-clauses"></a>
+<a name="where-nested"></a>
+### Where Nested
 
+If you need to group where condition within parentheses, you may use the `whereNested` method
+```php
+$users = DB::table('users')
+            ->where('votes', '>', 100)
+            ->whereNested(function($query) {
+                $query->where('name', 'Some Name')
+                      ->where('votes', '>', 50);
+            }, 'or')
+            ->get();
+
+```
+The example above will produce the following SQL:
+```sql
+select * from users where votes > 100 or (name = 'Some Name' and votes > 50)
+```
+<a name="additional-where-clauses"></a>
 ### Additional Where Clauses
 
 **whereBetween**
@@ -258,7 +273,7 @@ $users = DB::table('users')
                 ->whereColumn('updated_at', '>', 'created_at')
                 ->get();
 ```
-
+<a name="ordering-grouping-limit-and-offset"></a>
 ## Ordering, Grouping, Limit & Offset
 
 <a name="ordering"></a>
@@ -295,7 +310,7 @@ $users = DB::table('users')
 ```
 <a name="limit-and-offset"></a>
 ### Limit & Offset
-
+You may use the `offset` and `limit` methods to limit the number of results returned from the query or to skip a given number of results in the query:
 ```php
 $users = DB::table('users')
                 ->offset(10)

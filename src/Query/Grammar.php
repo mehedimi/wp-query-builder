@@ -441,4 +441,37 @@ class Grammar
             return "$join->type join $tableAndNestedJoins {$this->compileWheres($join)}";
         }, $joins));
     }
+
+    /**
+     * Compile the "group by" portions of the query.
+     *
+     * @param Builder $builder
+     * @param array $groups
+     * @return string
+     */
+    protected function compileGroups(Builder $builder, $groups)
+    {
+        $groups = array_map(function ($group) {
+            return implode(' ', array_filter($group));
+        }, $groups);
+
+        return 'group by ' . $this->columnize($groups);
+    }
+
+    /**
+     * Compile a nested where clause.
+     *
+     * @param  Builder  $builder
+     * @param  array  $where
+     * @return string
+     */
+    protected function whereNested(Builder $builder, $where)
+    {
+        // Here we will calculate what portion of the string we need to remove. If this
+        // is a join clause query, we need to remove the "on" portion of the SQL and
+        // if it is a normal query we need to take the leading "where" of queries.
+        $offset = $builder instanceof Join ? 3 : 6;
+
+        return '('.substr($this->compileWheres($where['query']), $offset).')';
+    }
 }

@@ -4,7 +4,6 @@ namespace Mehedi\WPQueryBuilder;
 
 use Mehedi\WPQueryBuilder\Contracts\Mixin;
 use Mehedi\WPQueryBuilder\Query\Builder;
-use Mehedi\WPQueryBuilder\Query\Grammar;
 
 class DB
 {
@@ -12,13 +11,12 @@ class DB
      * Set the table which the query is targeting.
      *
      * @param $table
-     * @param $as
      * @return Builder
      */
-    public static function table($table, $as = null)
+    public static function table($table)
     {
-        return (new Builder(Grammar::getInstance()))
-            ->from($table, $as);
+        return (new Builder())
+            ->from($table);
     }
 
     /**

@@ -99,7 +99,6 @@ class Builder
      */
     public $bindings = [
         'where' => [],
-        'join' => []
     ];
 
     /**
@@ -604,9 +603,6 @@ class Builder
         }
 
         $this->joins[] = $join;
-        $this->addBinding(
-            $join->getBindings(), 'join'
-        );
 
         return $this;
     }
@@ -674,6 +670,40 @@ class Builder
     public function groupBy($column, $direction = null)
     {
         $this->groups[] = [$column, $direction];
+
+        return $this;
+    }
+
+    /**
+     * Get a new instance of the query builder.
+     *
+     * @return Builder
+     */
+    public function newQuery()
+    {
+        return (new static($this->grammar));
+    }
+
+    /**
+     * Add a nested where statement to the query.
+     *
+     * @param  \Closure  $callback
+     * @param  string  $boolean
+     * @return $this
+     */
+    public function whereNested(Closure $callback, $boolean = 'and')
+    {
+        $callback($query = $this->newQuery());
+
+        if (! empty($query->wheres)) {
+            $type = 'Nested';
+
+            $this->wheres[] = compact('type', 'query', 'boolean');
+
+            foreach ($query->bindings['where'] as $binding) {
+                $this->addBinding($binding);
+            }
+        }
 
         return $this;
     }

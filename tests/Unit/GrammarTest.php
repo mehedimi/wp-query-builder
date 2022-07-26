@@ -2,6 +2,7 @@
 
 namespace Mehedi\WPQueryBuilderTests\Unit;
 
+use Mehedi\WPQueryBuilder\Query\Builder;
 use Mehedi\WPQueryBuilder\Query\Grammar;
 use Mehedi\WPQueryBuilder\Query\Join;
 use Mehedi\WPQueryBuilder\Query\WPDB;
@@ -542,6 +543,26 @@ class GrammarTest extends TestCase
             ->limit(100)
             ->toSQL();
 
-        $this->assertEquals('select * from wp_posts where  group by');
+        $this->assertEquals('select * from wp_posts where ID > %d group by ID, post_id asc limit 100', $sql);
+    }
+
+    /**
+     * @test
+     */
+    function it_can_compile_where_nested_query()
+    {
+        $this->initFakeDB();
+
+        FakeWPDB::add('get_results', function ($sql) {
+        });
+
+        FakeWPDB::add('prepare', function ($sql, ...$args) {
+            $this->assertEquals('select * from wp_posts where (type = %s or type_b = %s) and is_admin = %d', $sql);
+            $this->assertEquals(['type_one', 'type_c', 1], $args);
+        });
+
+        $this->getBuilder()->from('posts')->whereNested(function (Builder $builder) {
+            $builder->where('type', 'type_one')->orWhere('type_b', 'type_c');
+        })->where('is_admin', 1)->get();
     }
 }

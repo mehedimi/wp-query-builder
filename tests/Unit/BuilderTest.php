@@ -488,4 +488,20 @@ class BuilderTest extends TestCase
         $this->assertCount(2, $builder->groups);
         $this->assertEquals([['ID', null], ['post_id', 'asc']], $builder->groups);
     }
+
+    /**
+     * @test
+     */
+    function it_can_add_nested_where()
+    {
+        $builder = $this->builder()->whereNested(function (Builder $builder) {
+            $builder->where('ID', 1);
+        });
+
+        $this->assertInstanceOf(Builder::class, $builder);
+        $this->assertCount(1, $builder->wheres);
+        $this->assertInstanceOf(Builder::class, $builder->wheres[0]['query']);
+        $this->assertEquals('Nested', $builder->wheres[0]['type']);
+        $this->assertEquals('and', $builder->wheres[0]['boolean']);
+    }
 }

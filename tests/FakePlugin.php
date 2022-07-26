@@ -4,7 +4,7 @@ namespace Mehedi\WPQueryBuilderTests;
 
 use Mehedi\WPQueryBuilder\Query\Builder;
 
-class FakeMixin implements \Mehedi\WPQueryBuilder\Contracts\Mixin
+class FakePlugin implements \Mehedi\WPQueryBuilder\Contracts\Plugin
 {
     protected $callback;
 

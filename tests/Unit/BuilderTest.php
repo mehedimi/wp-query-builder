@@ -3,9 +3,9 @@
 namespace Mehedi\WPQueryBuilderTests\Unit;
 
 use Mehedi\WPQueryBuilder\DB;
-use Mehedi\WPQueryBuilder\Mixins\JoinPostWithMeta;
+use Mehedi\WPQueryBuilder\Plugins\JoinPostWithMeta;
 use Mehedi\WPQueryBuilder\Query\Builder;
-use Mehedi\WPQueryBuilderTests\FakeMixin;
+use Mehedi\WPQueryBuilderTests\FakePlugin;
 use PHPUnit\Framework\TestCase;
 use Mehedi\WPQueryBuilderTests\FakeWPDB;
 
@@ -471,7 +471,7 @@ class BuilderTest extends TestCase
 
         $builder = $this->builder()
             ->from('posts')
-            ->mixin(new FakeMixin($callback));
+            ->plugin(new FakePlugin($callback));
 
         $this->assertTrue($i);
         $this->assertInstanceOf(Builder::class, $builder);

@@ -4,17 +4,10 @@ namespace Mehedi\WPQueryBuilder\Query;
 
 use Closure;
 use InvalidArgumentException;
-use Mehedi\WPQueryBuilder\Contracts\Mixin;
+use Mehedi\WPQueryBuilder\Contracts\Plugin;
 
 class Builder
 {
-    /**
-     * Query grammar instance
-     *
-     * @var Grammar
-     */
-    protected $grammar;
-
     /**
      * All the available clause operators.
      *
@@ -28,70 +21,60 @@ class Builder
         '~', '~*', '!~', '!~*', 'similar to',
         'not similar to', 'not ilike', '~~*', '!~~*',
     ];
-
     /**
      * This contains aggregate column and function
      *
      * @var null|array
      */
     public $aggregate;
-
     /**
      * Indicate distinct query
      *
      * @var null|bool|string
      */
     public $distinct;
-
     /**
      * Query table name without prefix
      *
      * @var string
      */
     public $from;
-
     /**
      * Selected columns of a table
      *
      * @var string|array
      */
     public $columns = '*';
-
     /**
      * The maximum number of records to return.
      *
      * @var int
      */
     public $limit;
-
     /**
      * The number of records to skip.
      *
      * @var int
      */
     public $offset;
-
     /**
      * The where constraints for the query.
      *
      * @var array
      */
     public $wheres = [];
-
     /**
      * The orderings for the query.
      *
      * @var array
      */
     public $orders;
-
     /**
      * The table joins for the query.
      *
      * @var array
      */
     public $joins;
-
     /**
      * The current query value bindings.
      *
@@ -100,13 +83,18 @@ class Builder
     public $bindings = [
         'where' => [],
     ];
-
     /**
      * The groupings for the query.
      *
      * @var array
      */
     public $groups;
+    /**
+     * Query grammar instance
+     *
+     * @var Grammar
+     */
+    protected $grammar;
 
     /**
      * Create a new query builder instance.
@@ -155,6 +143,17 @@ class Builder
     }
 
     /**
+     * Retrieve the sum of the values of a given column.
+     *
+     * @param $column
+     * @return numeric
+     */
+    public function sum($column)
+    {
+        return $this->aggregate(__FUNCTION__, [$column]);
+    }
+
+    /**
      * Execute an aggregate function on the database.
      *
      * @param $function
@@ -175,14 +174,25 @@ class Builder
     }
 
     /**
-     * Retrieve the sum of the values of a given column.
+     * Execute the query as a "select" statement.
      *
-     * @param $column
-     * @return numeric
+     * @return mixed
      */
-    public function sum($column)
+    public function get()
     {
-        return $this->aggregate(__FUNCTION__, [$column]);
+        $query = WPDB::prepare($this->toSQL(), ...$this->bindings['where']);
+
+        return WPDB::get_results($query);
+    }
+
+    /**
+     * Returns generated SQL query
+     *
+     * @return string
+     */
+    public function toSQL()
+    {
+        return $this->grammar->compileSelectComponents($this);
     }
 
     /**
@@ -219,16 +229,14 @@ class Builder
     }
 
     /**
-     * Set the "limit" value of the query.
+     * Alias to set the "offset" value of the query.
      *
      * @param int $value
      * @return $this
      */
-    public function limit($value)
+    public function skip($value)
     {
-        $this->limit = !is_null($value) ? (int)$value : null;
-
-        return $this;
+        return $this->offset($value);
     }
 
     /**
@@ -242,29 +250,6 @@ class Builder
         $this->offset = !is_null($value) ? (int)$value : null;
 
         return $this;
-    }
-
-    /**
-     * Alias to set the "offset" value of the query.
-     *
-     * @param int $value
-     * @return $this
-     */
-    public function skip($value)
-    {
-        return $this->offset($value);
-    }
-
-    /**
-     * Execute the query as a "select" statement.
-     *
-     * @return mixed
-     */
-    public function get()
-    {
-        $query = WPDB::prepare($this->toSQL(), ...$this->bindings['where']);
-
-        return WPDB::get_results($query);
     }
 
     /**
@@ -282,13 +267,69 @@ class Builder
     }
 
     /**
-     * Returns generated SQL query
+     * Set the "limit" value of the query.
      *
-     * @return string
+     * @param int $value
+     * @return $this
      */
-    public function toSQL()
+    public function limit($value)
     {
-        return $this->grammar->compileSelectComponents($this);
+        $this->limit = !is_null($value) ? (int)$value : null;
+
+        return $this;
+    }
+
+    /**
+     * Add an "or where" clause to the query.
+     *
+     * @param Closure|string|array $column
+     * @param mixed $operator
+     * @param mixed $value
+     * @return $this
+     */
+    public function orWhere($column, $operator = null, $value = null)
+    {
+        list($value, $operator) = $this->prepareValueAndOperator(
+            $value, $operator, func_num_args() === 2
+        );
+
+        return $this->where($column, $operator, $value, 'or');
+    }
+
+    /**
+     * Prepare the value and operator for a where clause.
+     *
+     * @param string $value
+     * @param string $operator
+     * @param bool $useDefault
+     * @return array
+     *
+     * @throws InvalidArgumentException
+     */
+    public function prepareValueAndOperator($value, $operator, $useDefault = false)
+    {
+        if ($useDefault) {
+            return [$operator, '='];
+        } elseif ($this->invalidOperatorAndValue($operator, $value)) {
+            throw new InvalidArgumentException('Illegal operator and value combination.');
+        }
+
+        return [$value, $operator];
+    }
+
+    /**
+     * Determine if the given operator and value combination is legal.
+     *
+     * Prevents using Null values with invalid operators.
+     *
+     * @param string $operator
+     * @param mixed $value
+     * @return bool
+     */
+    protected function invalidOperatorAndValue($operator, $value)
+    {
+        return is_null($value) && in_array($operator, $this->operators) &&
+            !in_array($operator, ['=', '<>', '!=']);
     }
 
     /**
@@ -326,20 +367,22 @@ class Builder
     }
 
     /**
-     * Add an "or where" clause to the query.
+     * Add a "where null" clause to the query.
      *
-     * @param Closure|string|array $column
-     * @param mixed $operator
-     * @param mixed $value
+     * @param string|array $columns
+     * @param string $boolean
+     * @param bool $not
      * @return $this
      */
-    public function orWhere($column, $operator = null, $value = null)
+    public function whereNull($columns, $boolean = 'and', $not = false)
     {
-        list($value, $operator) = $this->prepareValueAndOperator(
-            $value, $operator, func_num_args() === 2
-        );
+        $type = $not ? 'NotNull' : 'Null';
 
-        return $this->where($column, $operator, $value, 'or');
+        foreach ((array)$columns as $column) {
+            $this->wheres[] = compact('type', 'column', 'boolean');
+        }
+
+        return $this;
     }
 
     /**
@@ -349,7 +392,7 @@ class Builder
      * @param string $type
      * @return $this
      *
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     protected function addBinding($value, $type = 'where')
     {
@@ -363,39 +406,16 @@ class Builder
     }
 
     /**
-     * Prepare the value and operator for a where clause.
+     * Add a "where not in" clause to the query.
      *
-     * @param string $value
-     * @param string $operator
-     * @param bool $useDefault
-     * @return array
-     *
-     * @throws \InvalidArgumentException
+     * @param string $column
+     * @param mixed $values
+     * @param string $boolean
+     * @return $this
      */
-    public function prepareValueAndOperator($value, $operator, $useDefault = false)
+    public function whereNotIn($column, $values, $boolean = 'and')
     {
-        if ($useDefault) {
-            return [$operator, '='];
-        } elseif ($this->invalidOperatorAndValue($operator, $value)) {
-            throw new InvalidArgumentException('Illegal operator and value combination.');
-        }
-
-        return [$value, $operator];
-    }
-
-    /**
-     * Determine if the given operator and value combination is legal.
-     *
-     * Prevents using Null values with invalid operators.
-     *
-     * @param string $operator
-     * @param mixed $value
-     * @return bool
-     */
-    protected function invalidOperatorAndValue($operator, $value)
-    {
-        return is_null($value) && in_array($operator, $this->operators) &&
-            !in_array($operator, ['=', '<>', '!=']);
+        return $this->whereIn($column, $values, $boolean, true);
     }
 
     /**
@@ -421,38 +441,6 @@ class Builder
     }
 
     /**
-     * Add a "where not in" clause to the query.
-     *
-     * @param string $column
-     * @param mixed $values
-     * @param string $boolean
-     * @return $this
-     */
-    public function whereNotIn($column, $values, $boolean = 'and')
-    {
-        return $this->whereIn($column, $values, $boolean, true);
-    }
-
-    /**
-     * Add a "where null" clause to the query.
-     *
-     * @param string|array $columns
-     * @param string $boolean
-     * @param bool $not
-     * @return $this
-     */
-    public function whereNull($columns, $boolean = 'and', $not = false)
-    {
-        $type = $not ? 'NotNull' : 'Null';
-
-        foreach ((array)$columns as $column) {
-            $this->wheres[] = compact('type', 'column', 'boolean');
-        }
-
-        return $this;
-    }
-
-    /**
      * Add a "where not null" clause to the query.
      *
      * @param string|array $columns
@@ -462,6 +450,19 @@ class Builder
     public function whereNotNull($columns, $boolean = 'and')
     {
         return $this->whereNull($columns, $boolean, true);
+    }
+
+    /**
+     * Add a where not between statement to the query.
+     *
+     * @param string $column
+     * @param   $values
+     * @param string $boolean
+     * @return $this
+     */
+    public function whereNotBetween($column, $values, $boolean = 'and')
+    {
+        return $this->whereBetween($column, $values, $boolean, true);
     }
 
     /**
@@ -486,19 +487,6 @@ class Builder
         }
 
         return $this;
-    }
-
-    /**
-     * Add a where not between statement to the query.
-     *
-     * @param string $column
-     * @param   $values
-     * @param string $boolean
-     * @return $this
-     */
-    public function whereNotBetween($column, $values, $boolean = 'and')
-    {
-        return $this->whereBetween($column, $values, $boolean, true);
     }
 
     /**
@@ -583,6 +571,20 @@ class Builder
     }
 
     /**
+     * Add a left join clause to the query
+     *
+     * @param $table
+     * @param $first
+     * @param $operator
+     * @param $second
+     * @return $this
+     */
+    public function leftJoin($table, $first = null, $operator = null, $second = null)
+    {
+        return $this->join($table, $first, $operator, $second, 'left');
+    }
+
+    /**
      * Add a join clause to the query.
      *
      * @param $table
@@ -605,20 +607,6 @@ class Builder
         $this->joins[] = $join;
 
         return $this;
-    }
-
-    /**
-     * Add a left join clause to the query
-     *
-     * @param $table
-     * @param $first
-     * @param $operator
-     * @param $second
-     * @return $this
-     */
-    public function leftJoin($table, $first = null, $operator = null, $second = null)
-    {
-        return $this->join($table, $first, $operator, $second, 'left');
     }
 
     /**
@@ -650,10 +638,10 @@ class Builder
     /**
      * Apply a mixin to builder class
      *
-     * @param Mixin $mixin
+     * @param Plugin $mixin
      * @return $this
      */
-    public function mixin(Mixin $mixin)
+    public function plugin(Plugin $mixin)
     {
         $mixin->apply($this);
 
@@ -675,27 +663,17 @@ class Builder
     }
 
     /**
-     * Get a new instance of the query builder.
-     *
-     * @return Builder
-     */
-    public function newQuery()
-    {
-        return (new static($this->grammar));
-    }
-
-    /**
      * Add a nested where statement to the query.
      *
-     * @param  \Closure  $callback
-     * @param  string  $boolean
+     * @param Closure $callback
+     * @param string $boolean
      * @return $this
      */
     public function whereNested(Closure $callback, $boolean = 'and')
     {
         $callback($query = $this->newQuery());
 
-        if (! empty($query->wheres)) {
+        if (!empty($query->wheres)) {
             $type = 'Nested';
 
             $this->wheres[] = compact('type', 'query', 'boolean');
@@ -706,5 +684,15 @@ class Builder
         }
 
         return $this;
+    }
+
+    /**
+     * Get a new instance of the query builder.
+     *
+     * @return Builder
+     */
+    public function newQuery()
+    {
+        return (new static($this->grammar));
     }
 }

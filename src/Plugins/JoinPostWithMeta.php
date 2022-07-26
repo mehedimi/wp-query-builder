@@ -1,11 +1,11 @@
 <?php
 
-namespace Mehedi\WPQueryBuilder\Mixins;
+namespace Mehedi\WPQueryBuilder\Plugins;
 
-use Mehedi\WPQueryBuilder\Contracts\Mixin;
+use Mehedi\WPQueryBuilder\Contracts\Plugin;
 use Mehedi\WPQueryBuilder\Query\Builder;
 
-class JoinPostWithMeta implements Mixin
+class JoinPostWithMeta implements Plugin
 {
     protected $type;
 

@@ -61,14 +61,126 @@ class Grammar
     }
 
     /**
-     * Convert an array of column names into a delimited string.
+     * Compile an insert statement into SQL.
      *
-     * @param array $columns
+     * @param Builder $builder
+     * @param array $values
+     * @param $ignore
      * @return string
      */
-    public function columnize(array $columns)
+    public function compileInsert(Builder $builder, array $values, $ignore)
     {
-        return implode(', ', $columns);
+        $table = $this->tableWithPrefix($builder->from);
+
+        if (empty($values)) {
+            return "insert into $table default values";
+        }
+
+        $columns = $this->columnize(array_keys(reset($values)));
+
+        $placeholderValues = implode(', ', array_map(function ($value) {
+            return '(' . implode(', ', array_map([$this, 'getValuePlaceholder'], $value)) . ')';
+        }, $values));
+
+        return "insert into $table($columns) values $placeholderValues";
+    }
+
+    /**
+     * Compile an update statement into SQL.
+     *
+     * @param Builder $builder
+     * @param array $values
+     * @return string
+     */
+    public function compileUpdate(Builder $builder, array $values)
+    {
+        $columns = $this->compileUpdateColumns($values);
+        $where = $this->compileWheres($builder);
+
+        return trim("update {$this->tableWithPrefix($builder->from)} set $columns $where");
+    }
+
+    /**
+     * Compile the columns for an update statement.
+     *
+     * @param $values
+     * @return string
+     */
+    protected function compileUpdateColumns($values)
+    {
+        return implode(', ', array_map(function ($key) use (&$values) {
+            return "$key = {$this->getValuePlaceholder($values[$key])}";
+        }, array_keys($values)));
+    }
+
+    /**
+     * Compile the "where" portions of the query.
+     *
+     * @param Builder $builder
+     * @return string
+     */
+    public function compileWheres(Builder $builder)
+    {
+        if (empty($builder->wheres)) {
+            return null;
+        }
+
+        return $this->concatenateWhereClauses(
+            $builder,
+            $this->compileWheresToArray($builder)
+        );
+    }
+
+    /**
+     * Format the where clause statements into one string.
+     *
+     * @param Builder $builder
+     * @param array $whereSegment
+     * @return string
+     */
+    protected function concatenateWhereClauses($builder, $whereSegment)
+    {
+        return ($builder instanceof Join ? 'on' : 'where') . ' ' . $this->removeLeadingBoolean(
+                implode(' ', $whereSegment)
+            );
+    }
+
+    /**
+     * Remove the leading boolean from a statement.
+     *
+     * @param string $value
+     * @return string
+     */
+    protected function removeLeadingBoolean($value)
+    {
+        return preg_replace('/and |or /i', '', $value, 1);
+    }
+
+    /**
+     * Get an array of all the where clauses for the query.
+     *
+     * @param Builder $builder
+     * @return string[]
+     */
+    protected function compileWheresToArray(Builder $builder)
+    {
+        return array_map(function ($where) use ($builder) {
+            return $where['boolean'] . ' ' . call_user_func([$this, 'where' . $where['type']], $builder, $where);
+        }, $builder->wheres);
+    }
+
+    /**
+     * Compile a delete statement into SQL.
+     *
+     * @param Builder $builder
+     * @return string
+     */
+    public function compileDelete(Builder $builder)
+    {
+        $table = $this->tableWithPrefix($builder->from);
+        $where = $this->compileWheres($builder);
+
+        return trim("delete from $table $where");
     }
 
     /**
@@ -106,6 +218,51 @@ class Grammar
     }
 
     /**
+     * Wrap with table prefix
+     *
+     * @param $columns
+     * @return string
+     */
+    protected function withPrefixColumns($columns)
+    {
+        if (is_string($columns)) {
+            $columns = [$columns];
+        }
+
+        $columns = array_map(function ($column) {
+            if (strpos($column, '.') === false) {
+                return $column;
+            }
+
+            return $this->tableWithPrefix($column);
+        }, $columns);
+
+        return $this->columnize($columns);
+    }
+
+    /**
+     * Get table name with prefix
+     *
+     * @param $table
+     * @return string
+     */
+    protected function tableWithPrefix($table)
+    {
+        return WPDB::prefix() . $table;
+    }
+
+    /**
+     * Convert an array of column names into a delimited string.
+     *
+     * @param array $columns
+     * @return string
+     */
+    public function columnize(array $columns)
+    {
+        return implode(', ', $columns);
+    }
+
+    /**
      * Compile the "from" portion of the query.
      *
      * @param Builder $builder
@@ -139,62 +296,6 @@ class Grammar
     protected function compileOffset(Builder $builder, $offset)
     {
         return 'offset ' . $offset;
-    }
-
-    /**
-     * Compile the "where" portions of the query.
-     *
-     * @param Builder $builder
-     * @return string
-     */
-    public function compileWheres(Builder $builder)
-    {
-        if (empty($builder->wheres)) {
-            return null;
-        }
-
-        return $this->concatenateWhereClauses(
-            $builder,
-            $this->compileWheresToArray($builder)
-        );
-    }
-
-    /**
-     * Get an array of all the where clauses for the query.
-     *
-     * @param Builder $builder
-     * @return string[]
-     */
-    protected function compileWheresToArray(Builder $builder)
-    {
-        return array_map(function ($where) use ($builder) {
-            return $where['boolean'] . ' ' . call_user_func([$this, 'where' . $where['type']], $builder, $where);
-        }, $builder->wheres);
-    }
-
-    /**
-     * Format the where clause statements into one string.
-     *
-     * @param Builder $builder
-     * @param array $whereSegment
-     * @return string
-     */
-    protected function concatenateWhereClauses($builder, $whereSegment)
-    {
-        return ($builder instanceof Join ? 'on' : 'where') . ' ' . $this->removeLeadingBoolean(
-                implode(' ', $whereSegment)
-            );
-    }
-
-    /**
-     * Remove the leading boolean from a statement.
-     *
-     * @param string $value
-     * @return string
-     */
-    protected function removeLeadingBoolean($value)
-    {
-        return preg_replace('/and |or /i', '', $value, 1);
     }
 
     /**
@@ -300,84 +401,6 @@ class Grammar
     }
 
     /**
-     * Compile an insert statement into SQL.
-     *
-     * @param Builder $builder
-     * @param array $values
-     * @param $ignore
-     * @return string
-     */
-    public function compileInsert(Builder $builder, array $values, $ignore)
-    {
-        $table = $this->tableWithPrefix($builder->from);
-
-        if (empty($values)) {
-            return "insert into $table default values";
-        }
-
-        $columns = $this->columnize(array_keys(reset($values)));
-
-        $placeholderValues = implode(', ', array_map(function ($value) {
-            return '(' . implode(', ', array_map([$this, 'getValuePlaceholder'], $value)) . ')';
-        }, $values));
-
-        return "insert into $table($columns) values $placeholderValues";
-    }
-
-    /**
-     * Get table name with prefix
-     *
-     * @param $table
-     * @return string
-     */
-    protected function tableWithPrefix($table)
-    {
-        return WPDB::prefix() . $table;
-    }
-
-    /**
-     * Compile an update statement into SQL.
-     *
-     * @param Builder $builder
-     * @param array $values
-     * @return string
-     */
-    public function compileUpdate(Builder $builder, array $values)
-    {
-        $columns = $this->compileUpdateColumns($values);
-        $where = $this->compileWheres($builder);
-
-        return trim("update {$this->tableWithPrefix($builder->from)} set $columns $where");
-    }
-
-    /**
-     * Compile the columns for an update statement.
-     *
-     * @param $values
-     * @return string
-     */
-    protected function compileUpdateColumns($values)
-    {
-        return implode(', ', array_map(function ($key) use (&$values) {
-            return "$key = {$this->getValuePlaceholder($values[$key])}";
-        }, array_keys($values)));
-    }
-
-    /**
-     * Compile a delete statement into SQL.
-     *
-     * @param Builder $builder
-     * @return string
-     */
-    public function compileDelete(Builder $builder)
-    {
-        $table = $this->tableWithPrefix($builder->from);
-        $where = $this->compileWheres($builder);
-
-        return trim("delete from $table $where");
-    }
-
-    /**
      * Compile the "order by" portions of the query.
      *
      * @param Builder $builder
@@ -399,29 +422,6 @@ class Grammar
     protected function whereColumn(Builder $builder, $where)
     {
         return "{$this->withPrefixColumns($where['first'])} {$where['operator']} {$this->withPrefixColumns($where['second'])}";
-    }
-
-    /**
-     * Wrap with table prefix
-     *
-     * @param $columns
-     * @return string
-     */
-    protected function withPrefixColumns($columns)
-    {
-        if (is_string($columns)) {
-            $columns = [$columns];
-        }
-
-        $columns = array_map(function ($column) {
-            if (strpos($column, '.') === false) {
-                return $column;
-            }
-
-            return $this->tableWithPrefix($column);
-        }, $columns);
-
-        return $this->columnize($columns);
     }
 
     /**
@@ -461,8 +461,8 @@ class Grammar
     /**
      * Compile a nested where clause.
      *
-     * @param  Builder  $builder
-     * @param  array  $where
+     * @param Builder $builder
+     * @param array $where
      * @return string
      */
     protected function whereNested(Builder $builder, $where)
@@ -472,6 +472,6 @@ class Grammar
         // if it is a normal query we need to take the leading "where" of queries.
         $offset = $builder instanceof Join ? 3 : 6;
 
-        return '('.substr($this->compileWheres($where['query']), $offset).')';
+        return '(' . substr($this->compileWheres($where['query']), $offset) . ')';
     }
 }

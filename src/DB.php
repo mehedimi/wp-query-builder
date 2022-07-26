@@ -2,7 +2,7 @@
 
 namespace Mehedi\WPQueryBuilder;
 
-use Mehedi\WPQueryBuilder\Contracts\Mixin;
+use Mehedi\WPQueryBuilder\Contracts\Plugin;
 use Mehedi\WPQueryBuilder\Query\Builder;
 
 class DB
@@ -22,11 +22,11 @@ class DB
     /**
      * Apply a mixin to builder class
      *
-     * @param Mixin $mixin
+     * @param Plugin $plugin
      * @return Builder
      */
-    public static function mixin(Mixin $mixin)
+    public static function plugin(Plugin $plugin)
     {
-        return (new Builder())->mixin($mixin);
+        return (new Builder())->plugin($plugin);
     }
 }

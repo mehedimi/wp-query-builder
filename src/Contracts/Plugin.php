@@ -4,10 +4,10 @@ namespace Mehedi\WPQueryBuilder\Contracts;
 
 use Mehedi\WPQueryBuilder\Query\Builder;
 
-interface Mixin
+interface Plugin
 {
     /**
-     * Apply login into that method
+     * Apply this plugin
      *
      * @param Builder $builder
      *

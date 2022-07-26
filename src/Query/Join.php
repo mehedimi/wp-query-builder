@@ -34,6 +34,19 @@ class Join extends Builder
     }
 
     /**
+     * Add an "or on" clause to the join.
+     *
+     * @param $first
+     * @param $operator
+     * @param $second
+     * @return Join
+     */
+    public function orOn($first, $operator = null, $second = null)
+    {
+        return $this->on($first, $operator, $second, 'or');
+    }
+
+    /**
      * Add an "on" clause to the join.
      *
      * @param $first
@@ -45,18 +58,5 @@ class Join extends Builder
     public function on($first, $operator = null, $second = null, $boolean = 'and')
     {
         return $this->whereColumn($first, $operator, $second, $boolean);
-    }
-
-    /**
-     * Add an "or on" clause to the join.
-     *
-     * @param $first
-     * @param $operator
-     * @param $second
-     * @return Join
-     */
-    public function orOn($first, $operator = null, $second = null)
-    {
-        return $this->on($first, $operator, $second, 'or');
     }
 }

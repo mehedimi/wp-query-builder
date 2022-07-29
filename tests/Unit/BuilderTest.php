@@ -2,8 +2,6 @@
 
 namespace Mehedi\WPQueryBuilderTests\Unit;
 
-use Mehedi\WPQueryBuilder\DB;
-use Mehedi\WPQueryBuilder\Plugins\JoinPostWithMeta;
 use Mehedi\WPQueryBuilder\Query\Builder;
 use Mehedi\WPQueryBuilderTests\FakePlugin;
 use PHPUnit\Framework\TestCase;

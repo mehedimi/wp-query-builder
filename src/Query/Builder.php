@@ -5,6 +5,9 @@ namespace Mehedi\WPQueryBuilder\Query;
 use Closure;
 use InvalidArgumentException;
 use Mehedi\WPQueryBuilder\Contracts\Plugin;
+use Mehedi\WPQueryBuilder\Relations\Relation;
+use Mehedi\WPQueryBuilder\Relations\WithMany;
+use Mehedi\WPQueryBuilder\Relations\WithOne;
 
 class Builder
 {
@@ -90,6 +93,12 @@ class Builder
      */
     public $groups;
     /**
+     * With queries
+     *
+     * @var array
+     */
+    public $with;
+    /**
      * Query grammar instance
      *
      * @var Grammar
@@ -154,6 +163,17 @@ class Builder
     }
 
     /**
+     * Retrieve the "count" result of the query.
+     *
+     * @param  string  $columns
+     * @return int
+     */
+    public function count($columns = '*')
+    {
+        return (int) $this->aggregate(__FUNCTION__, $columns);
+    }
+
+    /**
      * Execute an aggregate function on the database.
      *
      * @param $function
@@ -176,13 +196,22 @@ class Builder
     /**
      * Execute the query as a "select" statement.
      *
-     * @return mixed
+     * @return array
      */
     public function get()
     {
         $query = WPDB::prepare($this->toSQL(), ...$this->bindings['where']);
 
-        return WPDB::get_results($query);
+        $results = WPDB::get_results($query);
+
+        if (! empty($this->with)) {
+            foreach ($this->with as $relation) {
+                /** @var Relation $relation */
+                $results = $relation->setItems($results)->load();
+            }
+        }
+
+        return $results;
     }
 
     /**
@@ -259,11 +288,11 @@ class Builder
      */
     public function first()
     {
-        $sql = $this->limit(1)->toSQL();
+        $this->limit(1);
 
-        $query = WPDB::prepare($sql, ...$this->bindings['where']);
+        $items = $this->get();
 
-        return WPDB::get_row($query, ...func_get_args());
+        return reset($items);
     }
 
     /**
@@ -694,5 +723,41 @@ class Builder
     public function newQuery()
     {
         return (new static($this->grammar));
+    }
+
+    /**
+     * Add `withOne` relation
+     *
+     * @param $name
+     * @param callable $callback
+     * @param $foreignKey
+     * @param $localKey
+     * @return Builder
+     */
+    public function withOne($name, callable $callback, $foreignKey, $localKey = 'ID')
+    {
+        call_user_func($callback, $relation = new WithOne($name, $foreignKey, $localKey, $this->newQuery()));
+
+        $this->with[] = $relation;
+
+        return $this;
+    }
+
+    /**
+     * Add `withMany` relation
+     *
+     * @param $name
+     * @param callable $callback
+     * @param $foreignKey
+     * @param $localKey
+     * @return $this
+     */
+    public function withMany($name, callable $callback, $foreignKey, $localKey = 'ID')
+    {
+        call_user_func($callback, $relation = new WithMany($name, $foreignKey, $localKey, $this->newQuery()));
+
+        $this->with[] = $relation;
+
+        return $this;
     }
 }

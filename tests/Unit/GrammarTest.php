@@ -427,7 +427,8 @@ class GrammarTest extends TestCase
     {
         $this->initFakeDB();
 
-        FakeWPDB::add('get_row', function ($sql) {
+        FakeWPDB::add('get_results', function ($sql) {
+            return [];
         });
 
         FakeWPDB::add('prepare', function ($sql) {

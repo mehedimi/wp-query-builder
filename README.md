@@ -475,7 +475,7 @@ item. For example, a post may have an infinite number of comments. To use One-To
 use `withMany` method.
 
 ```php
-DB::table('posts')->withMany('comments', function(WithOne $relation){
+DB::table('posts')->withMany('comments', function(WithMany $relation){
     $relation->from('comments');
 }, 'comment_post_ID', 'ID')->get();
 ```

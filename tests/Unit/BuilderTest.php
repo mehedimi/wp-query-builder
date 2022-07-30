@@ -3,6 +3,7 @@
 namespace Mehedi\WPQueryBuilderTests\Unit;
 
 use Mehedi\WPQueryBuilder\Query\Builder;
+use Mehedi\WPQueryBuilder\Query\WPDB;
 use Mehedi\WPQueryBuilderTests\FakePlugin;
 use PHPUnit\Framework\TestCase;
 use Mehedi\WPQueryBuilderTests\FakeWPDB;
@@ -51,18 +52,6 @@ class BuilderTest extends TestCase
     /**
      * @test
      */
-    function it_can_set_table_alias()
-    {
-        $b = $this->builder();
-
-        $b->from('post');
-
-        $this->assertEquals('post', $b->from);
-    }
-
-    /**
-     * @test
-     */
     function it_can_set_aggregate_function()
     {
         $b = $this->builder();
@@ -72,21 +61,36 @@ class BuilderTest extends TestCase
         });
 
         FakeWPDB::add('get_results', function ($sql) {
-
+            return [
+                (object) [
+                    'aggregate' => 2
+                ]
+            ];
         });
 
-        \Mehedi\WPQueryBuilder\Query\WPDB::set(new FakeWPDB());
+        WPDB::set(new FakeWPDB());
 
-        $b->aggregate('sum', 'total');
+        $output = $b->aggregate('sum', 'total');
         $this->assertEquals(['sum', 'total'], $b->aggregate);
+        $this->assertEquals(2, $output);
 
         $b->aggregate('sum', 'total + amount');
         $this->assertEquals(['sum', 'total + amount'], $b->aggregate);
+
+        FakeWPDB::add('get_results', function ($sql) {
+            return [
+                (object) [
+                    'aggregate' => '2'
+                ]
+            ];
+        });
+
+        $this->assertSame(2, $this->builder()->avg('posts'));
     }
 
     function builder()
     {
-        return new \Mehedi\WPQueryBuilder\Query\Builder(\Mehedi\WPQueryBuilder\Query\Grammar::getInstance());
+        return new \Mehedi\WPQueryBuilder\Query\Builder();
     }
 
     /**

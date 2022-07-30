@@ -6,7 +6,7 @@ use Mehedi\WPQueryBuilder\Query\Builder;
 use Mehedi\WPQueryBuilder\Concerns\ForwardsCalls;
 
 /**
- * @method static Builder from($table)
+ * @method Builder from($table)
  */
 abstract class Relation
 {

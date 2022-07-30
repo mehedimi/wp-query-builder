@@ -159,18 +159,18 @@ class Builder
      */
     public function sum($column)
     {
-        return $this->aggregate(__FUNCTION__, [$column]);
+        return $this->aggregate(__FUNCTION__, $column);
     }
 
     /**
      * Retrieve the "count" result of the query.
      *
-     * @param  string  $columns
+     * @param string $columns
      * @return int
      */
     public function count($columns = '*')
     {
-        return (int) $this->aggregate(__FUNCTION__, $columns);
+        return (int)$this->aggregate(__FUNCTION__, $columns);
     }
 
     /**
@@ -190,7 +190,7 @@ class Builder
             return 0;
         }
 
-        return $data[0]['aggregate'];
+        return strpos($data[0]->aggregate, '.') ? floatval($data[0]->aggregate) : intval($data[0]->aggregate);
     }
 
     /**
@@ -204,7 +204,7 @@ class Builder
 
         $results = WPDB::get_results($query);
 
-        if (! empty($this->with)) {
+        if (!empty($this->with)) {
             foreach ($this->with as $relation) {
                 /** @var Relation $relation */
                 $results = $relation->setItems($results)->load();
@@ -232,7 +232,7 @@ class Builder
      */
     public function avg($column)
     {
-        return $this->aggregate(__FUNCTION__, [$column]);
+        return $this->aggregate(__FUNCTION__, $column);
     }
 
     /**
@@ -243,7 +243,7 @@ class Builder
      */
     public function min($column)
     {
-        return $this->aggregate(__FUNCTION__, [$column]);
+        return $this->aggregate(__FUNCTION__, $column);
     }
 
     /**
@@ -254,7 +254,7 @@ class Builder
      */
     public function max($column)
     {
-        return $this->aggregate(__FUNCTION__, [$column]);
+        return $this->aggregate(__FUNCTION__, $column);
     }
 
     /**

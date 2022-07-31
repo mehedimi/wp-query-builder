@@ -20,20 +20,12 @@ abstract class WithOneOrMany extends Relation
      */
     protected $localKey;
 
-    /**
-     * Name of the attribute
-     *
-     * @var string
-     */
-    protected $name;
-
     public function __construct($name, $foreignKey, $localKey, Builder $builder)
     {
-        $this->name = $name;
         $this->foreignKey = $foreignKey;
         $this->localKey = $localKey;
 
-        parent::__construct($builder);
+        parent::__construct($name, $builder);
     }
 
     /**
@@ -54,20 +46,5 @@ abstract class WithOneOrMany extends Relation
     protected function extractKeyValues()
     {
         return array_column($this->items, $this->localKey);
-    }
-
-    /**
-     * Load related items
-     *
-     * @return array
-     */
-    public function load()
-    {
-        $loadedItems = $this->loadedItemsDictionary();
-
-        return array_map(function ($item) use (&$loadedItems) {
-            $item->{$this->name} = $this->getItemFromDictionary($loadedItems, $item);
-            return $item;
-        }, $this->items);
     }
 }

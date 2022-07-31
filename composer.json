@@ -15,7 +15,9 @@
     "authors": [
         {
             "name": "Mehedi Hasan",
-            "email": "mehedihasansabbirmi@gmail.com"
+            "email": "mehedihasansabbirmi@gmail.com",
+            "homepage": "https://mehedi.im",
+            "role": "Developer"
         }
     ],
     "require-dev": {

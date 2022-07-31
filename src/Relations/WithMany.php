@@ -28,7 +28,7 @@ class WithMany extends WithOneOrMany
      * @param $item
      * @return array
      */
-    protected function getItemFromDictionary(&$loadedItems, &$item)
+    protected function getItemFromDictionary($loadedItems, $item)
     {
         if (array_key_exists($item->{$this->localKey}, $loadedItems)) {
             return $loadedItems[$item->{$this->localKey}];

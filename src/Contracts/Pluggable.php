@@ -4,7 +4,7 @@ namespace Mehedi\WPQueryBuilder\Contracts;
 
 use Mehedi\WPQueryBuilder\Query\Builder;
 
-interface Plugin
+interface Pluggable
 {
     /**
      * Apply this plugin

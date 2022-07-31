@@ -517,6 +517,32 @@ class GrammarTest extends TestCase
     /**
      * @test
      */
+    function it_can_pass_join_bindings()
+    {
+        $this->initFakeDB();
+
+        FakeWPDB::add('get_results', function ($sql) {
+            return [];
+        });
+
+        FakeWPDB::add('prepare', function ($sql, ...$params) {
+            $this->assertEquals('select wp_posts.* from wp_posts inner join wp_post_meta on wp_posts.ID = wp_post_meta.post_id and wp_post_meta.post_id in (%d, %d)', $sql);
+            $this->assertEquals([1, 4], $params);
+        });
+
+        $this->getBuilder()
+            ->select('posts.*')
+            ->from('posts')
+            ->join('post_meta', function (Join $join) {
+                $join->on( 'posts.ID', '=', 'post_meta.post_id')
+                    ->whereIn('post_meta.post_id', [1, 4]);
+            })
+            ->get();
+    }
+
+    /**
+     * @test
+     */
     function it_can_compile_multiple_join_clause()
     {
         $sql = $this->getBuilder()

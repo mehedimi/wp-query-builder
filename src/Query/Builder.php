@@ -4,10 +4,11 @@ namespace Mehedi\WPQueryBuilder\Query;
 
 use Closure;
 use InvalidArgumentException;
-use Mehedi\WPQueryBuilder\Contracts\Plugin;
+use Mehedi\WPQueryBuilder\Contracts\Pluggable;
 use Mehedi\WPQueryBuilder\Relations\Relation;
 use Mehedi\WPQueryBuilder\Relations\WithMany;
 use Mehedi\WPQueryBuilder\Relations\WithOne;
+use Mehedi\WPQueryBuilder\Relations\WithTaxonomy;
 
 class Builder
 {
@@ -84,6 +85,7 @@ class Builder
      * @var array
      */
     public $bindings = [
+        'join' => [],
         'where' => [],
     ];
     /**
@@ -200,7 +202,9 @@ class Builder
      */
     public function get()
     {
-        $query = WPDB::prepare($this->toSQL(), ...$this->bindings['where']);
+        $bindings = $this->getBindings();
+
+        $query = empty($bindings) ? $this->toSQL() : WPDB::prepare($this->toSQL(), ...$bindings);
 
         $results = WPDB::get_results($query);
 
@@ -428,8 +432,11 @@ class Builder
         if (!array_key_exists($type, $this->bindings)) {
             throw new InvalidArgumentException("Invalid binding type: $type.");
         }
-
-        $this->bindings[$type][] = $value;
+        if (is_array($value)) {
+            $this->bindings[$type] = array_merge($this->bindings[$type], $value);
+        } else {
+            $this->bindings[$type][] = $value;
+        }
 
         return $this;
     }
@@ -633,6 +640,8 @@ class Builder
             $join->on($first, $operator, $second);
         }
 
+        $this->addBinding($join->getBindings(), 'join');
+
         $this->joins[] = $join;
 
         return $this;
@@ -667,12 +676,12 @@ class Builder
     /**
      * Apply a mixin to builder class
      *
-     * @param Plugin $mixin
+     * @param Pluggable $pluggable
      * @return $this
      */
-    public function plugin(Plugin $mixin)
+    public function plugin(Pluggable $pluggable)
     {
-        $mixin->apply($this);
+        $pluggable->apply($this);
 
         return $this;
     }
@@ -755,6 +764,24 @@ class Builder
     public function withMany($name, callable $callback, $foreignKey, $localKey = 'ID')
     {
         call_user_func($callback, $relation = new WithMany($name, $foreignKey, $localKey, $this->newQuery()));
+
+        $this->with[] = $relation;
+
+        return $this;
+    }
+
+    /**
+     * Add relation to query
+     *
+     * @param Relation $relation
+     * @param callable|null $callback
+     * @return $this
+     */
+    public function addRelation(Relation $relation, callable $callback = null)
+    {
+        if (!is_null($callback)) {
+            call_user_func($callback, $relation);
+        }
 
         $this->with[] = $relation;
 

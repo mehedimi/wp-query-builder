@@ -2,9 +2,10 @@
 
 namespace Mehedi\WPQueryBuilderTests;
 
+use Mehedi\WPQueryBuilder\Contracts\Pluggable;
 use Mehedi\WPQueryBuilder\Query\Builder;
 
-class FakePlugin implements \Mehedi\WPQueryBuilder\Contracts\Plugin
+class FakePlugin implements Pluggable
 {
     protected $callback;
 

@@ -13,6 +13,13 @@ abstract class Relation
     use ForwardsCalls;
 
     /**
+     * The name of relation
+     *
+     * @var string
+     */
+    protected $name;
+
+    /**
      * The query builder instance
      *
      * @var Builder
@@ -24,17 +31,54 @@ abstract class Relation
      */
     protected $items;
 
-    public function __construct(Builder $builder)
+    /**
+     * Constructor of Relation Class
+     *
+     * @param $name
+     * @param Builder $builder
+     */
+    public function __construct($name, Builder $builder)
     {
+        $this->name = $name;
         $this->builder = $builder;
     }
 
     /**
-     * Load the relationship
+     * Get loaded items
+     *
+     * @return array[]
+     */
+    abstract protected function getLoadedItems();
+
+    /**
+     * Loaded items with under its foreign key
+     *
+     * @return array[]
+     */
+    abstract protected function loadedItemsDictionary();
+
+    /**
+     * Get mapped value from dictionary
+     *
+     * @return mixed
+     */
+    abstract protected function getItemFromDictionary($loadedItems, $item);
+
+
+    /**
+     * Load related items
      *
      * @return array
      */
-    abstract public function load();
+    public function load()
+    {
+        $loadedItems = $this->loadedItemsDictionary();
+
+        return array_map(function ($item) use (&$loadedItems) {
+            $item->{$this->name} = $this->getItemFromDictionary($loadedItems, $item);
+            return $item;
+        }, $this->items);
+    }
 
     /**
      * Set items of record

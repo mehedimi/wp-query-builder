@@ -27,6 +27,12 @@ WP Query Builder is package for developers, which can simplify query writing exp
 composer require mehedimi/wp-query-builder
 ```
 
+If you need extra feature of `WP Query Builder` then you may install `WP Query Builder Extension` Package
+
+```shell
+composer require mehedimi/wp-query-builder-ext
+```
+
 Then require the autoload file of composer into your theme or plugin file.
 
 <a name="running-database-queries"></a>
@@ -410,10 +416,6 @@ $users = DB::table('users')
                 ->get();
 ```
 
-<a name="on-demand-relations"></a>
-
-### On Demand Relations
-
 <a name="defining-relationships"></a>
 
 ## Defining Relationships
@@ -479,7 +481,9 @@ DB::table('posts')->withMany('comments', function(WithMany $relation){
     $relation->from('comments');
 }, 'comment_post_ID', 'ID')->get();
 ```
+
 Sample output will be like bellow
+
 ```php
 [
   [
@@ -506,7 +510,9 @@ Sample output will be like bellow
   ]
 ]
 ```
+
 And execute following two queries
+
 ```sql
 select * from posts
 select * from comments where comment_post_ID in (1, 2)

@@ -1,12 +1,12 @@
 <?php
 
-namespace Mehedi\WPQueryBuilderTests\Unit;
+namespace Mehedi\WPQueryBuilderTests\Units;
 
+use Mehedi\WPQueryBuilder\Connection;
 use Mehedi\WPQueryBuilder\Query\Builder;
-use Mehedi\WPQueryBuilder\Query\WPDB;
 use Mehedi\WPQueryBuilderTests\FakePlugin;
+use Mockery as m;
 use PHPUnit\Framework\TestCase;
-use Mehedi\WPQueryBuilderTests\FakeWPDB;
 
 class BuilderTest extends TestCase
 {
@@ -54,43 +54,36 @@ class BuilderTest extends TestCase
      */
     function it_can_set_aggregate_function()
     {
-        $b = $this->builder();
+        $mysqli_stmt = m::mock(\mysqli_stmt::class);
+        $mysqli_result = m::mock(\mysqli_result::class);
 
-        FakeWPDB::add('prepare', function ($sql) {
+        $mysqli_stmt->shouldReceive('bind_param');
+        $mysqli_stmt->shouldReceive('execute');
 
-        });
+        $mysqli_result->shouldReceive('fetch_all')->andReturn([['aggregate' => 0]]);
 
-        FakeWPDB::add('get_results', function ($sql) {
-            return [
-                (object) [
-                    'aggregate' => 2
-                ]
-            ];
-        });
+        $mysqli_stmt->shouldReceive('get_result')->andReturn($mysqli_result);
 
-        WPDB::set(new FakeWPDB());
+        $mysqli = m::mock(\mysqli::class);
+        $mysqli->shouldReceive('prepare')->andReturn($mysqli_stmt);
+
+        $b = $this->builder($mysqli);
 
         $output = $b->aggregate('sum', 'total');
         $this->assertEquals(['sum', 'total'], $b->aggregate);
-        $this->assertEquals(2, $output);
+        $this->assertEquals(0, $output);
 
         $b->aggregate('sum', 'total + amount');
         $this->assertEquals(['sum', 'total + amount'], $b->aggregate);
 
-        FakeWPDB::add('get_results', function ($sql) {
-            return [
-                (object) [
-                    'aggregate' => '2'
-                ]
-            ];
-        });
-
-        $this->assertSame(2, $this->builder()->avg('posts'));
+        $this->assertSame(0, $this->builder($mysqli)->avg('posts'));
     }
 
-    function builder()
+    function builder($mysqli = null)
     {
-        return new \Mehedi\WPQueryBuilder\Query\Builder();
+        $mysqli = $mysqli ?: m::mock(\mysqli::class);
+
+        return new \Mehedi\WPQueryBuilder\Query\Builder(new Connection($mysqli));
     }
 
     /**

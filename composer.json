@@ -1,28 +1,37 @@
 {
-    "name": "mehedimi/wp-query-builder",
-    "description": "A database query builder for WordPress",
-    "license": "MIT",
-    "autoload": {
-        "psr-4": {
-            "Mehedi\\WPQueryBuilder\\": "src/"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Mehedi\\WPQueryBuilderTests\\": "tests/"
-        }
-    },
-    "authors": [
-        {
-            "name": "Mehedi Hasan",
-            "email": "mehedihasansabbirmi@gmail.com",
-            "homepage": "https://mehedi.im",
-            "role": "Developer"
-        }
-    ],
-    "require-dev": {
-        "phpunit/phpunit": "^9.5",
-        "symfony/var-dumper": "^5.4",
-        "mockery/mockery": "^1.5"
+  "name": "mehedimi/wp-query-builder",
+  "description": "A database query builder for WordPress",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "Mehedi\\WPQueryBuilder\\": "src/"
     }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Mehedi\\WPQueryBuilderTests\\": "tests/"
+    }
+  },
+  "authors": [
+    {
+      "name": "Mehedi Hasan",
+      "email": "mehedihasansabbirmi@gmail.com",
+      "homepage": "https://mehedi.im",
+      "role": "Developer"
+    }
+  ],
+  "require-dev": {
+    "phpunit/phpunit": "^9.5",
+    "symfony/var-dumper": "^5.4",
+    "mockery/mockery": "^1.5",
+    "vlucas/phpdotenv": "^5.4"
+  },
+  "require": {
+    "ext-mysqli": "*"
+  },
+  "scripts": {
+    "test": "phpunit --testdox",
+    "test:units": "phpunit --filter=Units --testdox",
+    "test:integrations": "RUN_INTEGRATION_TEST=on phpunit --filter=Intergations --testdox"
+  }
 }

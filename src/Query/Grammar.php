@@ -9,6 +9,13 @@ class Grammar
     use Singleton;
 
     /**
+     * The grammar table prefix.
+     *
+     * @var string
+     */
+    protected $tablePrefix = '';
+
+    /**
      * The components that make up a select clause.
      *
      * @var string[]
@@ -24,18 +31,6 @@ class Grammar
         'limit',
         'offset',
     ];
-
-    /**
-     * Booted Grammar Class
-     *
-     * @return void
-     */
-    public function boot()
-    {
-        global $wpdb;
-
-        WPDB::set($wpdb);
-    }
 
     /**
      * Compile a select query into SQL.
@@ -248,7 +243,7 @@ class Grammar
      */
     protected function tableWithPrefix($table)
     {
-        return WPDB::prefix() . $table;
+        return $this->getTablePrefix() . $table;
     }
 
     /**
@@ -318,16 +313,11 @@ class Grammar
      */
     protected function getValuePlaceholder($value)
     {
-        switch (gettype($value)) {
-            case 'double':
-                return '%f';
-            case 'integer':
-                return '%d';
-            case 'NULL':
-                return 'null';
-            default:
-                return '%s';
+        if (is_null($value)) {
+            return 'null';
         }
+
+        return '?';
     }
 
     /**
@@ -473,5 +463,28 @@ class Grammar
         $offset = $builder instanceof Join ? 3 : 6;
 
         return '(' . substr($this->compileWheres($where['query']), $offset) . ')';
+    }
+
+    /**
+     * Get the grammar's table prefix.
+     *
+     * @return string
+     */
+    public function getTablePrefix()
+    {
+        return $this->tablePrefix;
+    }
+
+    /**
+     * Set the grammar's table prefix.
+     *
+     * @param string $prefix
+     * @return $this
+     */
+    public function setTablePrefix($prefix)
+    {
+        $this->tablePrefix = $prefix;
+
+        return $this;
     }
 }

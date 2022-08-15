@@ -1,13 +1,13 @@
 <?php
 
-namespace Mehedi\WPQueryBuilderTests\Unit;
+namespace Mehedi\WPQueryBuilderTests\Units;
 
 use Mehedi\WPQueryBuilder\Query\Builder;
-use Mehedi\WPQueryBuilder\Relations\WithOne;
+use Mehedi\WPQueryBuilder\Relations\WithMany;
 use PHPUnit\Framework\TestCase;
 use Mockery as m;
 
-class WithOneTest extends TestCase
+class WithManyTest extends TestCase
 {
     function builder()
     {
@@ -21,12 +21,12 @@ class WithOneTest extends TestCase
     {
         $builder = $this->builder()
             ->from('posts')
-            ->withOne('color', function (WithOne $builder) {
+            ->withMany('color', function (WithMany $builder) {
                 $builder->from('postmeta')->where('name', 'color');
             }, 'post_id', 'ID');
 
         $this->assertCount(1, $builder->with);
-        $this->assertInstanceOf(WithOne::class, $builder->with[0]);
+        $this->assertInstanceOf(WithMany::class, $builder->with[0]);
     }
 
     /**
@@ -56,15 +56,15 @@ class WithOneTest extends TestCase
             (object) [
                 'ID' => 1,
                 'name' => 'some',
-                'meta' => (object)[
+                'meta' => [(object)[
                     'post_id' => 1,
                     'value' => 'something'
-                ]
+                ]]
             ],
             (object) [
                 'ID' => 2,
                 'name' => 'some',
-                'meta' => null
+                'meta' => []
             ]
         ];
 
@@ -74,7 +74,7 @@ class WithOneTest extends TestCase
         $builder->shouldReceive('get')->andReturn($loadedItems);
         $this->assertEquals($loadedItems, $builder->get());
 
-        $relation = new WithOne('meta', 'post_id', 'ID', $builder);
+        $relation = new WithMany('meta', 'post_id', 'ID', $builder);
 
         $this->assertEquals($expectation, $relation->setItems($posts)->load());
     }

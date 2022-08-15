@@ -4,11 +4,11 @@ namespace Mehedi\WPQueryBuilder\Query;
 
 use Closure;
 use InvalidArgumentException;
+use Mehedi\WPQueryBuilder\Connection;
 use Mehedi\WPQueryBuilder\Contracts\Pluggable;
 use Mehedi\WPQueryBuilder\Relations\Relation;
 use Mehedi\WPQueryBuilder\Relations\WithMany;
 use Mehedi\WPQueryBuilder\Relations\WithOne;
-use Mehedi\WPQueryBuilder\Relations\WithTaxonomy;
 
 class Builder
 {
@@ -100,6 +100,7 @@ class Builder
      * @var array
      */
     public $with;
+
     /**
      * Query grammar instance
      *
@@ -108,12 +109,20 @@ class Builder
     protected $grammar;
 
     /**
+     * Connection instance
+     *
+     * @var Connection
+     */
+    protected $connection;
+
+    /**
      * Create a new query builder instance.
      *
      * @param Grammar|null $grammar
      */
-    public function __construct(Grammar $grammar = null)
+    public function __construct(Connection $connection = null, Grammar $grammar = null)
     {
+        $this->connection = $connection;
         $this->grammar = $grammar ?: Grammar::getInstance();
     }
 
@@ -180,7 +189,7 @@ class Builder
      *
      * @param $function
      * @param $column
-     * @return numeric
+     * @return float|int
      */
     public function aggregate($function, $column)
     {
@@ -192,7 +201,11 @@ class Builder
             return 0;
         }
 
-        return strpos($data[0]->aggregate, '.') ? floatval($data[0]->aggregate) : intval($data[0]->aggregate);
+        if (is_string($data[0]->aggregate)) {
+            return strpos($data[0]->aggregate, '.') ? floatval($data[0]->aggregate) : intval($data[0]->aggregate);
+        }
+
+        return $data[0]->aggregate;
     }
 
     /**
@@ -204,9 +217,7 @@ class Builder
     {
         $bindings = $this->getBindings();
 
-        $query = empty($bindings) ? $this->toSQL() : WPDB::prepare($this->toSQL(), ...$bindings);
-
-        $results = WPDB::get_results($query);
+        $results = $this->connection->select($this->toSQL(), $bindings);
 
         if (!empty($this->with)) {
             foreach ($this->with as $relation) {
@@ -296,7 +307,7 @@ class Builder
 
         $items = $this->get();
 
-        return reset($items);
+        return reset($items) ?: null;
     }
 
     /**
@@ -530,7 +541,7 @@ class Builder
      *
      * @param array $values
      * @param $ignore
-     * @return mixed
+     * @return bool|int
      */
     public function insert(array $values, $ignore = false)
     {
@@ -542,35 +553,44 @@ class Builder
             return array_merge($values, array_values(array_filter($value)));
         }, []);
 
-        return WPDB::query(
-            WPDB::prepare($this->grammar->compileInsert($this, $values, $ignore), ...$payload)
-        );
+        $query = $this->grammar->compileInsert($this, $values, $ignore);
+
+        if ($ignore) {
+            return $this
+                ->connection
+                ->affectingStatement($query, $payload);
+        }
+        return $this
+            ->connection
+            ->insert($query, $payload);
     }
 
     /**
      * Update records in the database.
      *
      * @param array $values
-     * @return mixed
+     * @return int
      */
     public function update(array $values)
     {
-        $payload = array_merge(array_values(array_filter($values)), $this->bindings['where']);
+        $bindings = array_merge(array_values($values), $this->getBindings());
 
-        return WPDB::query(
-            WPDB::prepare($this->grammar->compileUpdate($this, $values), ...$payload)
+        return $this->connection->affectingStatement(
+            $this->grammar->compileUpdate($this, $values),
+            $bindings
         );
     }
 
     /**
      * Delete records from the database.
      *
-     * @return mixed
+     * @return int
      */
     public function delete()
     {
-        return WPDB::query(
-            WPDB::prepare($this->grammar->compileDelete($this), ...$this->bindings['where'])
+        return $this->connection->affectingStatement(
+            $this->grammar->compileDelete($this),
+            $this->getBindings()
         );
     }
 
@@ -731,7 +751,7 @@ class Builder
      */
     public function newQuery()
     {
-        return (new static($this->grammar));
+        return (new static($this->connection, $this->grammar));
     }
 
     /**

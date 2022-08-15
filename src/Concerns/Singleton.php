@@ -22,7 +22,7 @@ trait Singleton
             static::$instance = new static;
 
             if (method_exists(static::$instance, 'boot')) {
-                call_user_func([self::$instance, 'boot']);
+                call_user_func([static::$instance, 'boot']);
             }
         }
 

@@ -30,7 +30,7 @@ class Join extends Builder
         $this->table = $table;
         $this->type = $type;
 
-        parent::__construct($grammar);
+        parent::__construct($this->connection, $grammar);
     }
 
     /**

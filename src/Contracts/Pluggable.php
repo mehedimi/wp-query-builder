@@ -7,7 +7,7 @@ use Mehedi\WPQueryBuilder\Query\Builder;
 interface Pluggable
 {
     /**
-     * Apply this plugin
+     * Apply that plugin
      *
      * @param Builder $builder
      *

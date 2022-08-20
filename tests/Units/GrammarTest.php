@@ -435,4 +435,34 @@ class GrammarTest extends TestCase
 
         $this->assertEquals('select * from wp_posts where (type = ? or type_b = ?) and is_admin = ?', $sql);
     }
+
+    /**
+     * @test
+     */
+    function it_can_compile_truncate_sql()
+    {
+        Grammar::getInstance()->setTablePrefix('wp_');
+
+        $b = new Builder(null, Grammar::getInstance());
+
+        $b->from('posts');
+
+        $this->assertEquals('truncate table wp_posts', Grammar::getInstance()->compileTruncate($b));
+    }
+
+    /**
+     * @test
+     */
+    function it_can_compile_insert_or_ignore()
+    {
+        Grammar::getInstance()->setTablePrefix('wp_');
+
+        $b = new Builder(null, Grammar::getInstance());
+
+        $b->from('posts');
+
+        $this->assertEquals(
+            'insert ignore into wp_posts(name) values (?)',
+            Grammar::getInstance()->compileInsert($b, [['name' => 'h']], true));
+    }
 }

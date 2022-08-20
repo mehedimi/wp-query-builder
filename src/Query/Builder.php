@@ -745,6 +745,18 @@ class Builder
     }
 
     /**
+     * Run a truncate statement on the table.
+     *
+     * @return bool
+     */
+    public function truncate()
+    {
+        return $this->connection->statement(
+          $this->grammar->compileTruncate($this)
+        );
+    }
+
+    /**
      * Get a new instance of the query builder.
      *
      * @return Builder

@@ -77,7 +77,7 @@ class Grammar
             return '(' . implode(', ', array_map([$this, 'getValuePlaceholder'], $value)) . ')';
         }, $values));
 
-        return "insert into $table($columns) values $placeholderValues";
+        return ($ignore ? 'insert ignore' : 'insert')." into $table($columns) values $placeholderValues";
     }
 
     /**
@@ -486,5 +486,16 @@ class Grammar
         $this->tablePrefix = $prefix;
 
         return $this;
+    }
+
+    /**
+     * Compile a truncate table statement into SQL.
+     *
+     * @param  Builder  $builder
+     * @return string
+     */
+    public function compileTruncate(Builder $builder)
+    {
+        return 'truncate table '.$this->tableWithPrefix($builder->from);
     }
 }

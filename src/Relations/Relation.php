@@ -106,6 +106,6 @@ abstract class Relation
             self::throwBadMethodCallException($name);
         }
 
-        return $this->forwardCallTo($this->builder, $name, $arguments);
+        return self::forwardCallTo($this->builder, $name, $arguments);
     }
 }

@@ -1,9 +1,11 @@
 ![WP Query Builder](https://banners.beyondco.de/WP%20Query%20Builder.png?theme=light&packageManager=composer+require&packageName=mehedimi%2Fwp-query-builder&pattern=architect&style=style_1&description=An+elegant+query+builder+for+WordPress&md=1&showWatermark=0&fontSize=125px&images=document-download)
+
 ## WP Query Builder
 
 WP Query Builder is package for developers, which can simplify query writing experience in WordPress.
 
 - [Installation](#installation)
+- [Running SQL Queries](#running-queries)
 - [Running Database Queries](#running-database-queries)
     - [Retrieving All Rows From A Table](#retrieving-all-rows-from-a-table)
     - [Retrieving A Single Row](#retrieving-a-single-row)
@@ -35,6 +37,51 @@ composer require mehedimi/wp-query-builder-ext
 ```
 
 Then require the autoload file of composer into your theme or plugin file.
+
+<a name="running-queries"></a>
+
+## Running SQL Queries
+
+The `DB` class provides methods for each type of query: `select`, `insert`, `statement` and `affectingStatement`.
+<a name="running-a-select-query"></a>
+
+#### Running A Select Query
+
+To run a basic SELECT query, you may use the `select` method on the `DB` class:
+
+```php
+$users = DB::select('select * from users where active = ?', [1]);
+```
+
+<a name="running-an-insert-statement"></a>
+
+#### Running An Insert Statement
+
+To execute an `insert` statement, you may use the `insert` method on the `DB` class. Like `select`, this method accepts
+the SQL query as its first argument and bindings as its second argument:
+
+```php
+DB::insert('insert into users (id, name) values (?, ?)', [1, 'Username']);
+```
+
+<a name="running-an-update-statement"></a>
+
+#### Running An Update Statement
+
+```php
+$affected = DB::affectingStatement(
+        'update users set votes = 100 where name = ?',
+        ['Anita']
+    );
+```
+
+<a name="running-a-delete-statement"></a>
+
+#### Running A Delete Statement
+
+```php
+ $deleted = DB::affectingStatement('delete from users');
+```
 
 <a name="running-database-queries"></a>
 

@@ -6,6 +6,7 @@ use Closure;
 use Mehedi\WPQueryBuilder\Exceptions\QueryException;
 use mysqli;
 use mysqli_result;
+use mysqli_sql_exception;
 
 class Connection
 {
@@ -91,7 +92,7 @@ class Connection
     protected function getRowsFromResult(mysqli_result $result)
     {
         return array_map(function ($row) {
-            return (object) $row;
+            return (object)$row;
         }, $result->fetch_all(MYSQLI_ASSOC));
     }
 
@@ -106,7 +107,15 @@ class Connection
     {
         return $this->run($query, $bindings, function ($query, $bindings) {
 
-            $statement = $this->mysqli->prepare($query);
+            try {
+                $statement = $this->mysqli->prepare($query);
+            } catch (mysqli_sql_exception $e) {
+                throw new QueryException($e->getMessage());
+            }
+
+            if (false === $statement) {
+                throw new QueryException($this->mysqli->error);
+            }
 
             $this->bindValues($statement, $bindings);
 
@@ -124,11 +133,15 @@ class Connection
     public function affectingStatement($query, $bindings = [])
     {
         return $this->run($query, $bindings, function ($query, $bindings) {
-
             // For update or delete statements, we want to get the number of rows affected
             // by the statement and return that back to the developer. We'll first need
             // to execute the statement, and then we'll use affected_rows property of mysqli_stmt.
-            $statement = $this->mysqli->prepare($query);
+            try {
+                $statement = $this->mysqli->prepare($query);
+            } catch (mysqli_sql_exception $e) {
+                throw new QueryException($e->getMessage());
+            }
+
 
             if (false === $statement) {
                 throw new QueryException($this->mysqli->error);
@@ -199,7 +212,7 @@ class Connection
      * @param float $time
      * @return void
      */
-    public function logQuery($query, $bindings, $time)
+    protected function logQuery($query, $bindings, $time)
     {
         if ($this->loggingQueries) {
             $this->queryLogs[] = compact('query', 'bindings', 'time');

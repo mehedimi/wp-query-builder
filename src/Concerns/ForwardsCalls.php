@@ -16,7 +16,7 @@ trait ForwardsCalls
      *
      * @throws \BadMethodCallException
      */
-    protected function forwardCallTo($object, $method, $parameters)
+    protected static function forwardCallTo($object, $method, $parameters)
     {
         try {
             return $object->{$method}(...$parameters);

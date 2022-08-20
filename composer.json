@@ -24,7 +24,8 @@
     "phpunit/phpunit": "^9.5",
     "symfony/var-dumper": "^5.4",
     "mockery/mockery": "^1.5",
-    "vlucas/phpdotenv": "^5.4"
+    "vlucas/phpdotenv": "^5.4",
+    "fakerphp/faker": "^1.20"
   },
   "require": {
     "ext-mysqli": "*"
@@ -32,6 +33,6 @@
   "scripts": {
     "test": "phpunit --testdox",
     "test:units": "phpunit --filter=Units --testdox",
-    "test:integrations": "RUN_INTEGRATION_TEST=on phpunit --filter=Intergations --testdox"
+    "test:features": "RUN_FEATURE_TEST=on phpunit --filter=Features --testdox"
   }
 }

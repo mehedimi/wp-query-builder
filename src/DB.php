@@ -2,12 +2,26 @@
 
 namespace Mehedi\WPQueryBuilder;
 
+use Mehedi\WPQueryBuilder\Concerns\ForwardsCalls;
 use Mehedi\WPQueryBuilder\Contracts\Pluggable;
 use Mehedi\WPQueryBuilder\Query\Builder;
 use Mehedi\WPQueryBuilder\Query\Grammar;
 
+/**
+ * @method array select($query, $bindings = [])
+ * @method bool statement($query, $bindings = [])
+ * @method int affectingStatement($query, $bindings = [])
+ * @method bool insert($query, $bindings = [])
+ * @method void enableQueryLog()
+ * @method void disableQueryLog()
+ * @method array getQueryLog()
+ *
+ * @see Connection
+ */
 class DB
 {
+    use ForwardsCalls;
+
     /**
      * Single connection instance
      *
@@ -63,6 +77,6 @@ class DB
      */
     public static function __callStatic($name, $arguments)
     {
-        return call_user_func_array([self::getConnection(), $name], $arguments);
+        return self::forwardCallTo(self::getConnection(), $name, $arguments);
     }
 }

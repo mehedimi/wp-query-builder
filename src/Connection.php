@@ -73,7 +73,15 @@ class Connection
             // For select statements, we'll simply execute the query and return an array
             // of the database result set. Each element in the array will be a single
             // row from the database table, and will either be an array or objects.
-            $statement = $this->mysqli->prepare($query);
+            try {
+                $statement = $this->mysqli->prepare($query);
+            } catch (mysqli_sql_exception $e) {
+                throw new QueryException($e->getMessage(), $e->getCode());
+            }
+
+            if (false === $statement) {
+                throw new QueryException($this->mysqli->error);
+            }
 
             $this->bindValues($statement, $bindings);
 

@@ -8,13 +8,14 @@ use Mehedi\WPQueryBuilder\Query\Builder;
 use Mehedi\WPQueryBuilder\Query\Grammar;
 
 /**
- * @method array select($query, $bindings = [])
- * @method bool statement($query, $bindings = [])
- * @method int affectingStatement($query, $bindings = [])
- * @method bool insert($query, $bindings = [])
- * @method void enableQueryLog()
- * @method void disableQueryLog()
- * @method array getQueryLog()
+ * @method static array select($query, $bindings = [])
+ * @method static bool statement($query, $bindings = [])
+ * @method static bool insert($query, $bindings = [])
+ * @method static bool update($query, $bindings = [])
+ * @method static bool delete($query, $bindings = [])
+ * @method static void enableQueryLog()
+ * @method static void disableQueryLog()
+ * @method static array getQueryLog()
  *
  * @see Connection
  */

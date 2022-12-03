@@ -2,11 +2,11 @@
 
 namespace Mehedi\WPQueryBuilder;
 
-use Closure;
-use Mehedi\WPQueryBuilder\Exceptions\QueryException;
 use mysqli;
+use Closure;
 use mysqli_result;
 use mysqli_sql_exception;
+use Mehedi\WPQueryBuilder\Exceptions\QueryException;
 
 class Connection
 {
@@ -87,7 +87,13 @@ class Connection
 
             $statement->execute();
 
-            return $this->getRowsFromResult($statement->get_result());
+            $result = $statement->get_result();
+
+            if ($result === false) {
+                throw new QueryException($statement->error);
+            }
+
+            return $this->getRowsFromResult($result);
         });
     }
 
@@ -173,6 +179,30 @@ class Connection
     public function insert($query, $bindings = [])
     {
         return $this->statement($query, $bindings);
+    }
+
+    /**
+     * Run update query with affected rows
+     *
+     * @param $query
+     * @param $bindings
+     * @return int
+     */
+    public function update($query, $bindings = [])
+    {
+        return $this->affectingStatement($query, $bindings);
+    }
+
+    /**
+     * Run delete query with affected rows
+     *
+     * @param $query
+     * @param $bindings
+     * @return int
+     */
+    public function delete($query, $bindings = [])
+    {
+        return $this->affectingStatement($query, $bindings);
     }
 
     /**

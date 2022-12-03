@@ -20,7 +20,7 @@ class Connection
     /**
      * Query logs
      *
-     * @var array
+     * @var array<int, array<string, string>>|null
      */
     protected $queryLogs;
 
@@ -44,8 +44,8 @@ class Connection
     /**
      * Run a SQL statement and log its execution context.
      *
-     * @param $query
-     * @param $bindings
+     * @param string $query
+     * @param array<int, mixed> $bindings
      * @param Closure $callback
      * @return mixed
      */
@@ -64,8 +64,8 @@ class Connection
      * Run a select statement against the database.
      *
      * @param string $query
-     * @param array $bindings
-     * @return array
+     * @param array<int, mixed> $bindings
+     * @return array<int, object>
      */
     public function select($query, $bindings = [])
     {
@@ -101,7 +101,7 @@ class Connection
      * Get rows from mysqli_result
      *
      * @param mysqli_result $result
-     * @return array
+     * @return array<int, object>
      */
     protected function getRowsFromResult(mysqli_result $result)
     {
@@ -114,7 +114,7 @@ class Connection
      * Execute an SQL statement and return the boolean result.
      *
      * @param string $query
-     * @param array $bindings
+     * @param array<int, mixed> $bindings
      * @return bool
      */
     public function statement($query, $bindings = [])
@@ -141,7 +141,7 @@ class Connection
      * Run an SQL statement and get the number of rows affected.
      *
      * @param string $query
-     * @param array $bindings
+     * @param array<int, mixed> $bindings
      * @return int
      */
     public function affectingStatement($query, $bindings = [])
@@ -173,7 +173,7 @@ class Connection
      * Run an insert statement against the database.
      *
      * @param string $query
-     * @param array $bindings
+     * @param array<int, mixed> $bindings
      * @return bool
      */
     public function insert($query, $bindings = [])
@@ -184,8 +184,8 @@ class Connection
     /**
      * Run update query with affected rows
      *
-     * @param $query
-     * @param $bindings
+     * @param string $query
+     * @param array<int, mixed> $bindings
      * @return int
      */
     public function update($query, $bindings = [])
@@ -196,8 +196,8 @@ class Connection
     /**
      * Run delete query with affected rows
      *
-     * @param $query
-     * @param $bindings
+     * @param string $query
+     * @param array<int, mixed> $bindings
      * @return int
      */
     public function delete($query, $bindings = [])
@@ -209,7 +209,7 @@ class Connection
      * Bind values to their parameters in the given statement.
      *
      * @param \mysqli_stmt $statement
-     * @param array $bindings
+     * @param array<int, mixed> $bindings
      * @return void
      */
     protected function bindValues($statement, $bindings)
@@ -234,7 +234,7 @@ class Connection
     /**
      * Get the elapsed time since a given starting point.
      *
-     * @param int $start
+     * @param float $start
      * @return float
      */
     protected function getElapsedTime($start)
@@ -246,7 +246,7 @@ class Connection
      * Log a query in the connection's query log.
      *
      * @param string $query
-     * @param array $bindings
+     * @param array<int, mixed> $bindings
      * @param float $time
      * @return void
      */
@@ -280,7 +280,7 @@ class Connection
     /**
      * Get the connection query logs.
      *
-     * @return array
+     * @return array<int, array<string, string>>|null
      */
     public function getQueryLog()
     {

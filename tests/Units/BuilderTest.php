@@ -127,8 +127,8 @@ class BuilderTest extends TestCase
         $b->where('is_admin', '=', 1);
         $this->assertCount(1, $b->wheres);
         $this->assertEquals(
-            ['type' => 'Basic', 'column' => 'is_admin', 'operator' => '=', 'value' => 1, 'boolean' => 'and'],
-            $b->wheres[0]
+            [['type' => 'Basic', 'column' => 'is_admin', 'operator' => '=', 'value' => 1, 'boolean' => 'and']],
+            $b->wheres
         );
         $this->assertCount(1, $b->bindings['where']);
         $this->assertEquals(1, $b->bindings['where'][0]);
@@ -147,8 +147,8 @@ class BuilderTest extends TestCase
         $b->where('is_admin', 1);
         $this->assertCount(1, $b->wheres);
         $this->assertEquals(
-            ['type' => 'Basic', 'column' => 'is_admin', 'operator' => '=', 'value' => 1, 'boolean' => 'and'],
-            $b->wheres[0]
+            [['type' => 'Basic', 'column' => 'is_admin', 'operator' => '=', 'value' => 1, 'boolean' => 'and']],
+            $b->wheres
         );
         $this->assertCount(1, $b->bindings['where']);
         $this->assertEquals(1, $b->bindings['where'][0]);
@@ -167,8 +167,8 @@ class BuilderTest extends TestCase
         $b->orWhere('is_admin', '=', 1);
         $this->assertCount(1, $b->wheres);
         $this->assertEquals(
-            ['type' => 'Basic', 'column' => 'is_admin', 'operator' => '=', 'value' => 1, 'boolean' => 'or'],
-            $b->wheres[0]
+            [['type' => 'Basic', 'column' => 'is_admin', 'operator' => '=', 'value' => 1, 'boolean' => 'or']],
+            $b->wheres
         );
         $this->assertCount(1, $b->bindings['where']);
         $this->assertEquals(1, $b->bindings['where'][0]);
@@ -188,8 +188,8 @@ class BuilderTest extends TestCase
 
         $this->assertCount(1, $b->wheres);
         $this->assertEquals(
-            ['type' => 'In', 'column' => 'id', 'values' => [2, '3', 8.3], 'boolean' => 'and'],
-            $b->wheres[0]
+            [['type' => 'In', 'column' => 'id', 'values' => [2, '3', 8.3], 'boolean' => 'and']],
+            $b->wheres
         );
         $this->assertCount(3, $b->bindings['where']);
         $this->assertEquals([2, '3', 8.3], $b->bindings['where']);
@@ -209,8 +209,8 @@ class BuilderTest extends TestCase
 
         $this->assertCount(1, $b->wheres);
         $this->assertEquals(
-            ['type' => 'NotIn', 'column' => 'id', 'values' => [2, '3', 8.3], 'boolean' => 'and'],
-            $b->wheres[0]
+            [['type' => 'NotIn', 'column' => 'id', 'values' => [2, '3', 8.3], 'boolean' => 'and']],
+            $b->wheres
         );
         $this->assertCount(3, $b->bindings['where']);
         $this->assertEquals([2, '3', 8.3], $b->bindings['where']);
@@ -230,8 +230,8 @@ class BuilderTest extends TestCase
 
         $this->assertCount(1, $b->wheres);
         $this->assertEquals(
-            ['type' => 'Null', 'column' => 'name', 'boolean' => 'and'],
-            $b->wheres[0]
+            [['type' => 'Null', 'column' => 'name', 'boolean' => 'and']],
+            $b->wheres
         );
 
         $b = $this->builder();
@@ -243,8 +243,8 @@ class BuilderTest extends TestCase
 
         $this->assertCount(1, $b->wheres);
         $this->assertEquals(
-            ['type' => 'Null', 'column' => 'name', 'boolean' => 'or'],
-            $b->wheres[0]
+            [['type' => 'Null', 'column' => 'name', 'boolean' => 'or']],
+            $b->wheres
         );
     }
 
@@ -262,8 +262,8 @@ class BuilderTest extends TestCase
 
         $this->assertCount(1, $b->wheres);
         $this->assertEquals(
-            ['type' => 'NotNull', 'column' => 'name', 'boolean' => 'and'],
-            $b->wheres[0]
+            [['type' => 'NotNull', 'column' => 'name', 'boolean' => 'and']],
+            $b->wheres
         );
 
         $b = $this->builder();
@@ -275,8 +275,8 @@ class BuilderTest extends TestCase
 
         $this->assertCount(1, $b->wheres);
         $this->assertEquals(
-            ['type' => 'NotNull', 'column' => 'name', 'boolean' => 'or'],
-            $b->wheres[0]
+            [['type' => 'NotNull', 'column' => 'name', 'boolean' => 'or']],
+            $b->wheres
         );
     }
 
@@ -294,12 +294,11 @@ class BuilderTest extends TestCase
 
         $this->assertCount(2, $b->wheres);
         $this->assertEquals(
-            ['type' => 'Null', 'column' => 'name', 'boolean' => 'and'],
-            $b->wheres[0]
-        );
-        $this->assertEquals(
-            ['type' => 'Null', 'column' => 'address', 'boolean' => 'and'],
-            $b->wheres[1]
+            [
+                ['type' => 'Null', 'column' => 'name', 'boolean' => 'and'],
+                ['type' => 'Null', 'column' => 'address', 'boolean' => 'and']
+            ],
+            $b->wheres
         );
     }
 
@@ -317,12 +316,11 @@ class BuilderTest extends TestCase
 
         $this->assertCount(2, $b->wheres);
         $this->assertEquals(
-            ['type' => 'NotNull', 'column' => 'name', 'boolean' => 'and'],
-            $b->wheres[0]
-        );
-        $this->assertEquals(
-            ['type' => 'NotNull', 'column' => 'address', 'boolean' => 'and'],
-            $b->wheres[1]
+            [
+                ['type' => 'NotNull', 'column' => 'name', 'boolean' => 'and'],
+                ['type' => 'NotNull', 'column' => 'address', 'boolean' => 'and']
+            ],
+            $b->wheres
         );
     }
 
@@ -340,8 +338,8 @@ class BuilderTest extends TestCase
 
         $this->assertCount(1, $b->wheres);
         $this->assertEquals(
-            ['type' => 'Null', 'column' => 'name', 'boolean' => 'and'],
-            $b->wheres[0]
+            [['type' => 'Null', 'column' => 'name', 'boolean' => 'and']],
+            $b->wheres
         );
     }
 
@@ -359,8 +357,8 @@ class BuilderTest extends TestCase
 
         $this->assertCount(1, $b->wheres);
         $this->assertEquals(
-            ['type' => 'Between', 'column' => 'amount', 'values' => [1, 10], 'boolean' => 'and', 'not' => false],
-            $b->wheres[0]
+            [['type' => 'Between', 'column' => 'amount', 'values' => [1, 10], 'boolean' => 'and', 'not' => false]],
+            $b->wheres
         );
     }
 
@@ -378,8 +376,8 @@ class BuilderTest extends TestCase
 
         $this->assertCount(1, $b->wheres);
         $this->assertEquals(
-            ['type' => 'Between', 'column' => 'amount', 'values' => [2, 45], 'boolean' => 'and', 'not' => false],
-            $b->wheres[0]
+            [['type' => 'Between', 'column' => 'amount', 'values' => [2, 45], 'boolean' => 'and', 'not' => false]],
+            $b->wheres
         );
     }
 

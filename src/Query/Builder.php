@@ -10,6 +10,9 @@ use Mehedi\WPQueryBuilder\Relations\Relation;
 use Mehedi\WPQueryBuilder\Relations\WithMany;
 use Mehedi\WPQueryBuilder\Relations\WithOne;
 
+/**
+ * @phpstan-consistent-constructor
+ */
 class Builder
 {
     /**
@@ -28,7 +31,7 @@ class Builder
     /**
      * This contains aggregate column and function
      *
-     * @var null|array
+     * @var null|array<int, string>
      */
     public $aggregate;
     /**
@@ -46,7 +49,7 @@ class Builder
     /**
      * Selected columns of a table
      *
-     * @var string|array
+     * @var string|array<int, string>
      */
     public $columns = '*';
     /**
@@ -64,25 +67,25 @@ class Builder
     /**
      * The where constraints for the query.
      *
-     * @var array
+     * @var array<int, mixed>
      */
     public $wheres = [];
     /**
      * The orderings for the query.
      *
-     * @var array
+     * @var array<int, mixed>
      */
     public $orders;
     /**
      * The table joins for the query.
      *
-     * @var array
+     * @var array<int, mixed>|null
      */
     public $joins;
     /**
      * The current query value bindings.
      *
-     * @var array
+     * @var array<string, mixed>
      */
     public $bindings = [
         'join' => [],
@@ -91,13 +94,13 @@ class Builder
     /**
      * The groupings for the query.
      *
-     * @var array
+     * @var array<int, mixed>|null
      */
     public $groups;
     /**
      * With queries
      *
-     * @var array
+     * @var array<int, mixed>|null
      */
     public $with;
 
@@ -129,7 +132,7 @@ class Builder
     /**
      * Set the table which the query is targeting.
      *
-     * @param $table
+     * @param string $table
      * @return $this
      */
     public function from($table)
@@ -141,7 +144,7 @@ class Builder
     /**
      * Select table columns
      *
-     * @param $columns
+     * @param string|array<int, string> $columns
      * @return $this
      */
     public function select($columns)
@@ -153,7 +156,7 @@ class Builder
     /**
      * Use distinct query
      *
-     * @param $column
+     * @param bool $column
      * @return $this
      */
     public function distinct($column = true)
@@ -165,8 +168,8 @@ class Builder
     /**
      * Retrieve the sum of the values of a given column.
      *
-     * @param $column
-     * @return numeric
+     * @param string $column
+     * @return float|int
      */
     public function sum($column)
     {
@@ -187,8 +190,8 @@ class Builder
     /**
      * Execute an aggregate function on the database.
      *
-     * @param $function
-     * @param $column
+     * @param string $function
+     * @param string $column
      * @return float|int
      */
     public function aggregate($function, $column)
@@ -211,7 +214,7 @@ class Builder
     /**
      * Execute the query as a "select" statement.
      *
-     * @return array
+     * @return array<int, object>
      */
     public function get()
     {
@@ -242,8 +245,8 @@ class Builder
     /**
      * Retrieve the average of the values of a given column.
      *
-     * @param $column
-     * @return numeric
+     * @param string $column
+     * @return float|int
      */
     public function avg($column)
     {
@@ -253,8 +256,8 @@ class Builder
     /**
      * Retrieve the minimum value of a given column.
      *
-     * @param $column
-     * @return numeric
+     * @param string $column
+     * @return float|int
      */
     public function min($column)
     {
@@ -264,8 +267,8 @@ class Builder
     /**
      * Retrieve the maximum value of a given column.
      *
-     * @param $column
-     * @return numeric
+     * @param string $column
+     * @return float|int
      */
     public function max($column)
     {
@@ -286,7 +289,7 @@ class Builder
     /**
      * Set the "offset" value of the query.
      *
-     * @param $value
+     * @param int|null $value
      * @return $this
      */
     public function offset($value)
@@ -299,7 +302,7 @@ class Builder
     /**
      * Execute the query and get the first result.
      *
-     * @return mixed
+     * @return object|null
      */
     public function first()
     {
@@ -313,7 +316,7 @@ class Builder
     /**
      * Set the "limit" value of the query.
      *
-     * @param int $value
+     * @param int|null $value
      * @return $this
      */
     public function limit($value)
@@ -326,7 +329,7 @@ class Builder
     /**
      * Add an "or where" clause to the query.
      *
-     * @param Closure|string|array $column
+     * @param Closure|string|array<int, mixed> $column
      * @param mixed $operator
      * @param mixed $value
      * @return $this
@@ -346,7 +349,7 @@ class Builder
      * @param string $value
      * @param string $operator
      * @param bool $useDefault
-     * @return array
+     * @return array<int, mixed>
      *
      * @throws InvalidArgumentException
      */
@@ -379,10 +382,10 @@ class Builder
     /**
      * Add a basic where clause to the query.
      *
-     * @param $column
-     * @param $operator
-     * @param $value
-     * @param $boolean
+     * @param string $column
+     * @param string|null $operator
+     * @param string|null|float|int $value
+     * @param string $boolean
      * @return $this
      */
     public function where($column, $operator = null, $value = null, $boolean = 'and')
@@ -413,7 +416,7 @@ class Builder
     /**
      * Add a "where null" clause to the query.
      *
-     * @param string|array $columns
+     * @param string|array<int, string> $columns
      * @param string $boolean
      * @param bool $not
      * @return $this
@@ -490,7 +493,7 @@ class Builder
     /**
      * Add a "where not null" clause to the query.
      *
-     * @param string|array $columns
+     * @param string|array<int, string> $columns
      * @param string $boolean
      * @return $this
      */
@@ -503,11 +506,11 @@ class Builder
      * Add a where not between statement to the query.
      *
      * @param string $column
-     * @param   $values
+     * @param array<int|string, string> $values
      * @param string $boolean
      * @return $this
      */
-    public function whereNotBetween($column, $values, $boolean = 'and')
+    public function whereNotBetween($column, array $values, $boolean = 'and')
     {
         return $this->whereBetween($column, $values, $boolean, true);
     }
@@ -516,7 +519,7 @@ class Builder
      * Add a where between statement to the query.
      *
      * @param string $column
-     * @param  $values
+     * @param array<string|int, int|float|string> $values
      * @param string $boolean
      * @param bool $not
      * @return $this
@@ -539,8 +542,8 @@ class Builder
     /**
      * Insert new records into the database.
      *
-     * @param array $values
-     * @param $ignore
+     * @param array<int|string, mixed> $values
+     * @param bool $ignore
      * @return bool|int
      */
     public function insert(array $values, $ignore = false)
@@ -568,7 +571,7 @@ class Builder
     /**
      * Update records in the database.
      *
-     * @param array $values
+     * @param array<string, mixed> $values
      * @return int
      */
     public function update(array $values)
@@ -597,8 +600,8 @@ class Builder
     /**
      * Add an "order by" clause to the query.
      *
-     * @param $column
-     * @param $direction
+     * @param string $column
+     * @param string $direction
      * @return $this
      */
     public function orderBy($column, $direction = 'asc')
@@ -611,6 +614,10 @@ class Builder
     /**
      * Add a "where" clause comparing two columns to the query.
      *
+     * @param string $first
+     * @param string|null $operator
+     * @param string|null $second
+     * @param string $boolean
      * @return $this
      */
     public function whereColumn($first, $operator = null, $second = null, $boolean = 'and')
@@ -629,10 +636,10 @@ class Builder
     /**
      * Add a left join clause to the query
      *
-     * @param $table
-     * @param $first
-     * @param $operator
-     * @param $second
+     * @param string $table
+     * @param string|null $first
+     * @param string|null $operator
+     * @param string|null $second
      * @return $this
      */
     public function leftJoin($table, $first = null, $operator = null, $second = null)
@@ -643,11 +650,11 @@ class Builder
     /**
      * Add a join clause to the query.
      *
-     * @param $table
-     * @param $first
-     * @param $operator
-     * @param $second
-     * @param $type
+     * @param string $table
+     * @param string|null|Closure $first
+     * @param string|null $operator
+     * @param string|null $second
+     * @param string $type
      * @return $this
      */
     public function join($table, $first = null, $operator = null, $second = null, $type = 'inner')
@@ -670,10 +677,10 @@ class Builder
     /**
      * Add a right join clause to the query
      *
-     * @param $table
-     * @param $first
-     * @param $operator
-     * @param $second
+     * @param string $table
+     * @param string|null|Closure $first
+     * @param string|null $operator
+     * @param string|null $second
      * @return $this
      */
     public function rightJoin($table, $first = null, $operator = null, $second = null)
@@ -684,7 +691,7 @@ class Builder
     /**
      * Get the current query value bindings in a flattened array.
      *
-     * @return array
+     * @return array<int, mixed>
      */
     public function getBindings()
     {
@@ -709,8 +716,8 @@ class Builder
     /**
      * Add a `group by` clause to query
      *
-     * @param $column
-     * @param $direction
+     * @param string $column
+     * @param string|null $direction
      * @return Builder
      */
     public function groupBy($column, $direction = null)
@@ -769,10 +776,10 @@ class Builder
     /**
      * Add `withOne` relation
      *
-     * @param $name
+     * @param string $name
      * @param callable $callback
-     * @param $foreignKey
-     * @param $localKey
+     * @param string $foreignKey
+     * @param string $localKey
      * @return Builder
      */
     public function withOne($name, callable $callback, $foreignKey, $localKey = 'ID')
@@ -787,10 +794,10 @@ class Builder
     /**
      * Add `withMany` relation
      *
-     * @param $name
+     * @param string $name
      * @param callable $callback
-     * @param $foreignKey
-     * @param $localKey
+     * @param string $foreignKey
+     * @param string $localKey
      * @return $this
      */
     public function withMany($name, callable $callback, $foreignKey, $localKey = 'ID')

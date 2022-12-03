@@ -17,7 +17,7 @@ class GrammarTest extends TestCase
 
         $g = Grammar::getInstance()->setTablePrefix('wp_');
 
-        return new \Mehedi\WPQueryBuilder\Query\Builder(new Connection($mysqli, $g));
+        return new \Mehedi\WPQueryBuilder\Query\Builder(new Connection($mysqli), $g);
     }
 
     /**

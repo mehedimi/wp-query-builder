@@ -26,14 +26,14 @@ class DB
     /**
      * Single connection instance
      *
-     * @var Connection
+     * @var Connection|null
      */
     protected static $connection;
 
     /**
      * Set the table which the query is targeting.
      *
-     * @param $table
+     * @param string $table
      * @return Builder
      */
     public static function table($table)
@@ -72,8 +72,8 @@ class DB
     /**
      * Handle dynamic method calling
      *
-     * @param $name
-     * @param $arguments
+     * @param string $name
+     * @param array<int> $arguments
      * @return Builder
      */
     public static function __callStatic($name, $arguments)

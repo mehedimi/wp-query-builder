@@ -11,7 +11,7 @@ trait ForwardsCalls
      *
      * @param  mixed  $object
      * @param  string  $method
-     * @param  array  $parameters
+     * @param  array<int, mixed>  $parameters
      * @return mixed
      *
      * @throws \BadMethodCallException

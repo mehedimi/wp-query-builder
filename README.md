@@ -69,9 +69,9 @@ DB::insert('insert into users (id, name) values (?, ?)', [1, 'Username']);
 #### Running An Update Statement
 
 ```php
-$affected = DB::affectingStatement(
+$affected = DB::update(
         'update users set votes = 100 where name = ?',
-        ['Anita']
+        ['Omar']
     );
 ```
 
@@ -80,7 +80,7 @@ $affected = DB::affectingStatement(
 #### Running A Delete Statement
 
 ```php
- $deleted = DB::affectingStatement('delete from users');
+ $deleted = DB::delete('delete from users');
 ```
 
 <a name="running-database-queries"></a>

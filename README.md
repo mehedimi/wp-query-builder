@@ -42,7 +42,7 @@ Then require the autoload file of composer into your theme or plugin file.
 
 ## Running SQL Queries
 
-The `DB` class provides methods for each type of query: `select`, `insert`, `statement` and `affectingStatement`.
+The `DB` class provides methods for each type of query: `select`, `insert`, `update`, `delete`, `statement` and `affectingStatement`.
 <a name="running-a-select-query"></a>
 
 #### Running A Select Query

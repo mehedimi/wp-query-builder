@@ -838,7 +838,7 @@ class Builder
      * @param callable|null $callback
      * @return $this
      */
-    public function addRelation(Relation $relation, callable $callback = null)
+    public function withRelation(Relation $relation, callable $callback = null)
     {
         if (!is_null($callback)) {
             call_user_func($callback, $relation);

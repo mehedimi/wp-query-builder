@@ -43,22 +43,11 @@ class DB
     }
 
     /**
-     * Apply a mixin to builder class
-     *
-     * @param Pluggable $plugin
-     * @return Builder
-     */
-    public static function plugin(Pluggable $plugin)
-    {
-        return (new Builder(self::getConnection()))->plugin($plugin);
-    }
-
-    /**
      * Get the database connection from `$wpdb`
      *
      * @return Connection
      */
-    protected static function getConnection()
+    public static function getConnection()
     {
         if (is_null(self::$connection)) {
             global $wpdb;
@@ -67,6 +56,17 @@ class DB
         }
 
         return self::$connection;
+    }
+
+    /**
+     * Apply a mixin to builder class
+     *
+     * @param Pluggable $plugin
+     * @return Builder
+     */
+    public static function plugin(Pluggable $plugin)
+    {
+        return (new Builder(self::getConnection()))->plugin($plugin);
     }
 
     /**

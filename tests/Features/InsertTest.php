@@ -40,7 +40,7 @@ class InsertTest extends QueryBuilderFeatureTest
     /**
      * @test
      */
-    function it_can_insert_multiple_rows()
+    public function it_can_insert_multiple_rows()
     {
         $this->ifNeedSkip();
 
@@ -86,11 +86,11 @@ class InsertTest extends QueryBuilderFeatureTest
             ]
         ]);
     }
-    
+
     /**
      * @test
      */
-    function it_can_handle_insert_or_ignore()
+    public function it_can_handle_insert_or_ignore()
     {
         $this->ifNeedSkip();
 
@@ -138,7 +138,7 @@ class InsertTest extends QueryBuilderFeatureTest
     /**
      * @test
      */
-    function it_can_throw_an_exception()
+    public function it_can_throw_an_exception()
     {
         $this->ifNeedSkip();
         $this->expectException(QueryException::class);

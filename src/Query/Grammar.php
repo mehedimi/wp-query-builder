@@ -7,7 +7,7 @@ class Grammar
     /**
      * Store single instance of current class
      *
-     * @var Grammar|null $instance
+     * @var Grammar|null
      */
     protected static $instance;
 
@@ -43,7 +43,7 @@ class Grammar
     public static function getInstance()
     {
         if (is_null(static::$instance)) {
-            static::$instance = new self;
+            static::$instance = new self();
         }
 
         return static::$instance;
@@ -94,7 +94,52 @@ class Grammar
             return '(' . implode(', ', array_map([$this, 'getValuePlaceholder'], $value)) . ')';
         }, $values));
 
-        return ($ignore ? 'insert ignore' : 'insert')." into $table($columns) values $placeholderValues";
+        return ($ignore ? 'insert ignore' : 'insert') . " into $table($columns) values $placeholderValues";
+    }
+
+    /**
+     * Get table name with prefix
+     *
+     * @param string $table
+     * @return string
+     */
+    protected function tableWithPrefix($table)
+    {
+        return $this->getTablePrefix() . $table;
+    }
+
+    /**
+     * Get the grammar's table prefix.
+     *
+     * @return string
+     */
+    public function getTablePrefix()
+    {
+        return $this->tablePrefix;
+    }
+
+    /**
+     * Set the grammar's table prefix.
+     *
+     * @param string $prefix
+     * @return $this
+     */
+    public function setTablePrefix($prefix)
+    {
+        $this->tablePrefix = $prefix;
+
+        return $this;
+    }
+
+    /**
+     * Convert an array of column names into a delimited string.
+     *
+     * @param array<int, string> $columns
+     * @return string
+     */
+    public function columnize(array $columns)
+    {
+        return implode(', ', $columns);
     }
 
     /**
@@ -123,6 +168,21 @@ class Grammar
         return implode(', ', array_map(function ($key) use (&$values) {
             return "$key = {$this->getValuePlaceholder($values[$key])}";
         }, array_keys($values)));
+    }
+
+    /**
+     * Get value placeholder based on value data type
+     *
+     * @param mixed|null $value
+     * @return string
+     */
+    protected function getValuePlaceholder($value)
+    {
+        if (is_null($value)) {
+            return 'null';
+        }
+
+        return '?';
     }
 
     /**
@@ -196,11 +256,21 @@ class Grammar
     }
 
     /**
+     * Compile a truncate table statement into SQL.
+     *
+     * @param Builder $builder
+     * @return string
+     */
+    public function compileTruncate(Builder $builder)
+    {
+        return 'truncate table ' . $this->tableWithPrefix($builder->from);
+    }
+
+    /**
      * Compile an aggregated select clause.
      *
      * @param Builder $builder
      * @param array<int, string> $aggregate
-     *
      * @return string
      */
     protected function compileAggregate(Builder $builder, array $aggregate)
@@ -213,7 +283,6 @@ class Grammar
      *
      * @param Builder $builder
      * @param array<int, string>|string $columns
-     *
      * @return bool|string|null
      */
     protected function compileColumns(Builder $builder, $columns)
@@ -250,28 +319,6 @@ class Grammar
         }, $columns);
 
         return $this->columnize($columns);
-    }
-
-    /**
-     * Get table name with prefix
-     *
-     * @param string $table
-     * @return string
-     */
-    protected function tableWithPrefix($table)
-    {
-        return $this->getTablePrefix() . $table;
-    }
-
-    /**
-     * Convert an array of column names into a delimited string.
-     *
-     * @param array<int, string> $columns
-     * @return string
-     */
-    public function columnize(array $columns)
-    {
-        return implode(', ', $columns);
     }
 
     /**
@@ -320,21 +367,6 @@ class Grammar
     protected function whereBasic(Builder $builder, $where)
     {
         return "{$this->withPrefixColumns($where['column'])} {$where['operator']} " . $this->getValuePlaceholder($where['value']);
-    }
-
-    /**
-     * Get value placeholder based on value data type
-     *
-     * @param mixed|null $value
-     * @return string
-     */
-    protected function getValuePlaceholder($value)
-    {
-        if (is_null($value)) {
-            return 'null';
-        }
-
-        return '?';
     }
 
     /**
@@ -482,39 +514,5 @@ class Grammar
         $offset = $builder instanceof Join ? 3 : 6;
 
         return '(' . substr($this->compileWheres($where['query']), $offset) . ')';
-    }
-
-    /**
-     * Get the grammar's table prefix.
-     *
-     * @return string
-     */
-    public function getTablePrefix()
-    {
-        return $this->tablePrefix;
-    }
-
-    /**
-     * Set the grammar's table prefix.
-     *
-     * @param string $prefix
-     * @return $this
-     */
-    public function setTablePrefix($prefix)
-    {
-        $this->tablePrefix = $prefix;
-
-        return $this;
-    }
-
-    /**
-     * Compile a truncate table statement into SQL.
-     *
-     * @param  Builder  $builder
-     * @return string
-     */
-    public function compileTruncate(Builder $builder)
-    {
-        return 'truncate table '.$this->tableWithPrefix($builder->from);
     }
 }

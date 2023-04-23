@@ -2,8 +2,8 @@
 
 namespace Mehedi\WPQueryBuilder\Relations;
 
-use Mehedi\WPQueryBuilder\Query\Builder;
 use Mehedi\WPQueryBuilder\Concerns\ForwardsCalls;
+use Mehedi\WPQueryBuilder\Query\Builder;
 
 /**
  * @method Builder from($table)
@@ -27,15 +27,15 @@ abstract class Relation
     protected $builder;
 
     /**
-     * @var array
+     * @var array<integer, object>
      */
     protected $items;
 
     /**
      * Constructor of Relation Class
      *
-     * @param $name
-     * @param Builder $builder
+     * @param string $name
+     * @param Builder|null $builder
      */
     public function __construct($name, Builder $builder = null)
     {
@@ -44,31 +44,9 @@ abstract class Relation
     }
 
     /**
-     * Get loaded items
-     *
-     * @return array[]
-     */
-    abstract protected function getLoadedItems();
-
-    /**
-     * Loaded items with under its foreign key
-     *
-     * @return array[]
-     */
-    abstract protected function loadedItemsDictionary();
-
-    /**
-     * Get mapped value from dictionary
-     *
-     * @return mixed
-     */
-    abstract protected function getItemFromDictionary($loadedItems, $item);
-
-
-    /**
      * Load related items
      *
-     * @return array
+     * @return array<integer, object>
      */
     public function load()
     {
@@ -76,14 +54,31 @@ abstract class Relation
 
         return array_map(function ($item) use (&$loadedItems) {
             $item->{$this->name} = $this->getItemFromDictionary($loadedItems, $item);
+
             return $item;
         }, $this->items);
     }
 
     /**
+     * Loaded items with under its foreign key
+     *
+     * @return array<string|integer, object | array<integer, object>>
+     */
+    abstract protected function loadedItemsDictionary();
+
+    /**
+     * Get mapped value from dictionary
+     *
+     * @param array<string, object | array<integer, object>> $loadedItems
+     * @param object $item
+     * @return object|null | array<int, object>
+     */
+    abstract protected function getItemFromDictionary($loadedItems, $item);
+
+    /**
      * Set items of record
      *
-     * @param array $items
+     * @param array<integer, object> $items
      * @return $this
      */
     public function setItems(array $items)
@@ -96,8 +91,8 @@ abstract class Relation
     /**
      * Handle dynamic methods call of query builder
      *
-     * @param $name
-     * @param $arguments
+     * @param string $name
+     * @param array<integer, string> $arguments
      * @return Builder
      */
     public function __call($name, $arguments)
@@ -108,4 +103,11 @@ abstract class Relation
 
         return self::forwardCallTo($this->builder, $name, $arguments);
     }
+
+    /**
+     * Get loaded items
+     *
+     * @return array<integer, object>
+     */
+    abstract protected function getLoadedItems();
 }

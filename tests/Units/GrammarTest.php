@@ -6,24 +6,18 @@ use Mehedi\WPQueryBuilder\Connection;
 use Mehedi\WPQueryBuilder\Query\Builder;
 use Mehedi\WPQueryBuilder\Query\Grammar;
 use Mehedi\WPQueryBuilder\Query\Join;
-use PHPUnit\Framework\TestCase;
 use Mockery as m;
+use mysqli;
+use mysqli_result;
+use mysqli_stmt;
+use PHPUnit\Framework\TestCase;
 
 class GrammarTest extends TestCase
 {
-    function getBuilder()
-    {
-        $mysqli = m::mock(\mysqli::class);
-
-        $g = Grammar::getInstance()->setTablePrefix('wp_');
-
-        return new \Mehedi\WPQueryBuilder\Query\Builder(new Connection($mysqli), $g);
-    }
-
     /**
      * @test
      */
-    function it_can_compile_select_columns()
+    public function it_can_compile_select_columns()
     {
         $sql = $this->getBuilder()->select('*')->toSQL();
         $this->assertEquals('select *', $sql);
@@ -35,10 +29,19 @@ class GrammarTest extends TestCase
         $this->assertEquals('select name, id', $sql);
     }
 
+    public function getBuilder()
+    {
+        $mysqli = m::mock(mysqli::class);
+
+        $g = Grammar::getInstance()->setTablePrefix('wp_');
+
+        return new Builder(new Connection($mysqli), $g);
+    }
+
     /**
      * @test
      */
-    function it_can_compile_from_table()
+    public function it_can_compile_from_table()
     {
         $sql = $this->getBuilder()->from('posts')->toSQL();
         $this->assertEquals('select * from wp_posts', $sql);
@@ -47,7 +50,7 @@ class GrammarTest extends TestCase
     /**
      * @test
      */
-    function it_can_compile_distinct_query()
+    public function it_can_compile_distinct_query()
     {
         $sql = $this->getBuilder()->distinct()->select('name')->from('posts')->toSQL();
         $this->assertEquals('select distinct name from wp_posts', $sql);
@@ -58,7 +61,7 @@ class GrammarTest extends TestCase
     /**
      * @test
      */
-    function it_can_compile_table_alias()
+    public function it_can_compile_table_alias()
     {
         $sql = $this->getBuilder()->from('posts')->toSQL();
         $this->assertEquals('select * from wp_posts', $sql);
@@ -67,12 +70,12 @@ class GrammarTest extends TestCase
     /**
      * @test
      */
-    function it_can_compile_aggregation()
+    public function it_can_compile_aggregation()
     {
-        $m = m::mock(\mysqli::class);
-        $p = m::mock(\mysqli_stmt::class);
+        $m = m::mock(mysqli::class);
+        $p = m::mock(mysqli_stmt::class);
 
-        $mysqli_result = m::mock(\mysqli_result::class);
+        $mysqli_result = m::mock(mysqli_result::class);
 
         $mysqli_result->shouldReceive('fetch_all')->andReturn([]);
 
@@ -98,7 +101,7 @@ class GrammarTest extends TestCase
     /**
      * @test
      */
-    function it_can_compile_limit()
+    public function it_can_compile_limit()
     {
         $sql = $this->getBuilder()
             ->from('posts')
@@ -111,7 +114,7 @@ class GrammarTest extends TestCase
     /**
      * @test
      */
-    function it_can_compile_offset()
+    public function it_can_compile_offset()
     {
         $sql = $this->getBuilder()
             ->from('posts')
@@ -124,7 +127,7 @@ class GrammarTest extends TestCase
     /**
      * @test
      */
-    function it_can_compile_offset_limit()
+    public function it_can_compile_offset_limit()
     {
         $sql = $this->getBuilder()
             ->from('posts')
@@ -138,7 +141,7 @@ class GrammarTest extends TestCase
     /**
      * @test
      */
-    function it_can_compile_a_basic_where_clause()
+    public function it_can_compile_a_basic_where_clause()
     {
         $sql = $this->getBuilder()
             ->from('posts')
@@ -164,7 +167,7 @@ class GrammarTest extends TestCase
     /**
      * @test
      */
-    function it_can_compile_multiple_basic_where_clause()
+    public function it_can_compile_multiple_basic_where_clause()
     {
         $sql = $this->getBuilder()
             ->from('posts')
@@ -179,7 +182,7 @@ class GrammarTest extends TestCase
     /**
      * @test
      */
-    function it_can_compile_basic_or_where_clause()
+    public function it_can_compile_basic_or_where_clause()
     {
         $sql = $this->getBuilder()
             ->from('posts')
@@ -193,7 +196,7 @@ class GrammarTest extends TestCase
     /**
      * @test
      */
-    function it_can_compile_where_in_clause()
+    public function it_can_compile_where_in_clause()
     {
         $sql = $this->getBuilder()
             ->from('posts')
@@ -206,7 +209,7 @@ class GrammarTest extends TestCase
     /**
      * @test
      */
-    function it_can_compile_where_not_in_clause()
+    public function it_can_compile_where_not_in_clause()
     {
         $sql = $this->getBuilder()
             ->from('posts')
@@ -219,7 +222,7 @@ class GrammarTest extends TestCase
     /**
      * @test
      */
-    function it_can_compile_where_null_clause()
+    public function it_can_compile_where_null_clause()
     {
         $sql = $this->getBuilder()
             ->from('posts')
@@ -233,7 +236,7 @@ class GrammarTest extends TestCase
     /**
      * @test
      */
-    function it_can_compile_where_not_null_clause()
+    public function it_can_compile_where_not_null_clause()
     {
         $sql = $this->getBuilder()
             ->from('posts')
@@ -247,7 +250,7 @@ class GrammarTest extends TestCase
     /**
      * @test
      */
-    function it_can_compile_where_between_clause()
+    public function it_can_compile_where_between_clause()
     {
         $sql = $this->getBuilder()
             ->from('posts')
@@ -261,10 +264,10 @@ class GrammarTest extends TestCase
     /**
      * @test
      */
-    function it_can_compile_insert()
+    public function it_can_compile_insert()
     {
-        $m = m::mock(\mysqli::class);
-        $p = m::mock(\mysqli_stmt::class);
+        $m = m::mock(mysqli::class);
+        $p = m::mock(mysqli_stmt::class);
         $p->shouldReceive('bind_param');
         $p->shouldReceive('execute');
         $p->shouldReceive('fetch_object');
@@ -287,12 +290,12 @@ class GrammarTest extends TestCase
             ->with('insert into wp_posts(name, id, add) values (?, ?, null)')
             ->andReturn($p);
 
-            $b->from('posts')
-                ->insert([
-                    'name' => 'foo',
-                    'id' => 3,
-                    'add' => null
-                ]);
+        $b->from('posts')
+            ->insert([
+                'name' => 'foo',
+                'id' => 3,
+                'add' => null
+            ]);
 
         $m->shouldReceive('prepare')
             ->with('insert into wp_posts(name, id) values (?, ?), (?, ?)')
@@ -316,11 +319,11 @@ class GrammarTest extends TestCase
     /**
      * @test
      */
-    function it_can_able_to_fetch_only_first_record()
+    public function it_can_able_to_fetch_only_first_record()
     {
-        $m = m::mock(\mysqli::class);
-        $stmt = m::mock(\mysqli_stmt::class);
-        $result = m::mock(\mysqli_result::class);
+        $m = m::mock(mysqli::class);
+        $stmt = m::mock(mysqli_stmt::class);
+        $result = m::mock(mysqli_result::class);
 
         $this->assertTrue(true);
 
@@ -340,14 +343,15 @@ class GrammarTest extends TestCase
         $b->from('posts')->first();
     }
 
-    function gen() {
+    public function gen()
+    {
         yield [];
     }
 
     /**
      * @test
      */
-    function it_can_compile_order_by_clause()
+    public function it_can_compile_order_by_clause()
     {
         $sql = $this->getBuilder()
             ->from('posts')
@@ -368,7 +372,7 @@ class GrammarTest extends TestCase
     /**
      * @test
      */
-    function it_can_compile_where_column_clause()
+    public function it_can_compile_where_column_clause()
     {
         $sql = $this->getBuilder()
             ->from('posts')
@@ -388,7 +392,7 @@ class GrammarTest extends TestCase
     /**
      * @test
      */
-    function it_can_compile_join_clause()
+    public function it_can_compile_join_clause()
     {
         $sql = $this->getBuilder()
             ->from('posts')
@@ -401,7 +405,7 @@ class GrammarTest extends TestCase
             ->select('posts.*')
             ->from('posts')
             ->join('post_meta', function (Join $join) {
-                $join->on( 'posts.ID', '=', 'post_meta.post_id');
+                $join->on('posts.ID', '=', 'post_meta.post_id');
             })
             ->toSQL();
 
@@ -411,7 +415,7 @@ class GrammarTest extends TestCase
     /**
      * @test
      */
-    function it_can_compile_group_by()
+    public function it_can_compile_group_by()
     {
         $sql = $this->getBuilder()
             ->from('posts')
@@ -427,7 +431,7 @@ class GrammarTest extends TestCase
     /**
      * @test
      */
-    function it_can_compile_where_nested_query()
+    public function it_can_compile_where_nested_query()
     {
         $sql = $this->getBuilder()->from('posts')->whereNested(function (Builder $builder) {
             $builder->where('type', 'type_one')->orWhere('type_b', 'type_c');
@@ -439,7 +443,7 @@ class GrammarTest extends TestCase
     /**
      * @test
      */
-    function it_can_compile_truncate_sql()
+    public function it_can_compile_truncate_sql()
     {
         Grammar::getInstance()->setTablePrefix('wp_');
 
@@ -453,7 +457,7 @@ class GrammarTest extends TestCase
     /**
      * @test
      */
-    function it_can_compile_insert_or_ignore()
+    public function it_can_compile_insert_or_ignore()
     {
         Grammar::getInstance()->setTablePrefix('wp_');
 
@@ -463,6 +467,7 @@ class GrammarTest extends TestCase
 
         $this->assertEquals(
             'insert ignore into wp_posts(name) values (?)',
-            Grammar::getInstance()->compileInsert($b, [['name' => 'h']], true));
+            Grammar::getInstance()->compileInsert($b, [['name' => 'h']], true)
+        );
     }
 }

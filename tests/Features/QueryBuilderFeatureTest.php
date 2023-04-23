@@ -9,11 +9,14 @@ use PHPUnit\Framework\TestCase;
 
 abstract class QueryBuilderFeatureTest extends TestCase
 {
-    protected function setUp(): void
+    public function truncate($table)
     {
-        parent::setUp();
+        return $this->getBuilder()->from($table)->truncate();
+    }
 
-        LoadEnv::load();
+    public function getBuilder($table = null)
+    {
+        return (new Builder($this->getConnection()))->from($table);
     }
 
     public function getConnection()
@@ -26,20 +29,17 @@ abstract class QueryBuilderFeatureTest extends TestCase
         return new Connection(TestMysqli::get());
     }
 
-    public function getBuilder($table = null)
-    {
-        return (new Builder($this->getConnection()))->from($table);
-    }
-
-    function truncate($table)
-    {
-        return $this->getBuilder()->from($table)->truncate();
-    }
-
-    function ifNeedSkip()
+    public function ifNeedSkip()
     {
         if (empty($_ENV)) {
             $this->markTestSkipped('Need to configure database connection.');
         }
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        LoadEnv::load();
     }
 }

@@ -30,12 +30,14 @@
     "phpstan/phpstan-mockery": "^1.1"
   },
   "require": {
-    "ext-mysqli": "*"
+    "ext-mysqli": "*",
+    "php": ">=5.5"
   },
   "scripts": {
     "test": "phpunit --testdox",
     "test:units": "phpunit --filter=Units --testdox",
     "test:features": "RUN_FEATURE_TEST=on phpunit --filter=Features --testdox",
-    "analyze": "vendor/bin/phpstan analyse -c phpstan.neon"
+    "check": "vendor/bin/phpstan analyse -c phpstan.neon",
+    "pre-commit": "composer check && composer test"
   }
 }

@@ -28,60 +28,70 @@ class Builder
         '~', '~*', '!~', '!~*', 'similar to',
         'not similar to', 'not ilike', '~~*', '!~~*',
     ];
+
     /**
      * This contains aggregate column and function
      *
      * @var null|array<int, string>
      */
     public $aggregate;
+
     /**
      * Indicate distinct query
      *
      * @var null|bool|string
      */
     public $distinct;
+
     /**
      * Query table name without prefix
      *
      * @var string
      */
     public $from;
+
     /**
      * Selected columns of a table
      *
      * @var string|array<int, string>
      */
     public $columns = '*';
+
     /**
      * The maximum number of records to return.
      *
      * @var int
      */
     public $limit;
+
     /**
      * The number of records to skip.
      *
      * @var int
      */
     public $offset;
+
     /**
      * The where constraints for the query.
      *
      * @var array<int, mixed>
      */
     public $wheres = [];
+
     /**
      * The orderings for the query.
      *
      * @var array<int, mixed>
      */
     public $orders;
+
     /**
      * The table joins for the query.
      *
      * @var array<int, mixed>|null
      */
     public $joins;
+
     /**
      * The current query value bindings.
      *
@@ -91,12 +101,14 @@ class Builder
         'join' => [],
         'where' => [],
     ];
+
     /**
      * The groupings for the query.
      *
      * @var array<int, mixed>|null
      */
     public $groups;
+
     /**
      * With queries
      *
@@ -138,18 +150,7 @@ class Builder
     public function from($table)
     {
         $this->from = $table;
-        return $this;
-    }
 
-    /**
-     * Select table columns
-     *
-     * @param string|array<int, string> $columns
-     * @return $this
-     */
-    public function select($columns)
-    {
-        $this->columns = is_array($columns) ? $columns : func_get_args();
         return $this;
     }
 
@@ -162,6 +163,7 @@ class Builder
     public function distinct($column = true)
     {
         $this->distinct = $column;
+
         return $this;
     }
 
@@ -174,17 +176,6 @@ class Builder
     public function sum($column)
     {
         return $this->aggregate(__FUNCTION__, $column);
-    }
-
-    /**
-     * Retrieve the "count" result of the query.
-     *
-     * @param string $columns
-     * @return int
-     */
-    public function count($columns = '*')
-    {
-        return (int)$this->aggregate(__FUNCTION__, $columns);
     }
 
     /**
@@ -233,6 +224,31 @@ class Builder
     }
 
     /**
+     * Get the current query value bindings in a flattened array.
+     *
+     * @return array<int, mixed>
+     */
+    public function getBindings()
+    {
+        return array_reduce($this->bindings, function ($bindings, $binding) {
+            return array_merge($bindings, array_values($binding));
+        }, []);
+    }
+
+    /**
+     * Select table columns
+     *
+     * @param string|array<int, string> $columns
+     * @return $this
+     */
+    public function select($columns)
+    {
+        $this->columns = is_array($columns) ? $columns : func_get_args();
+
+        return $this;
+    }
+
+    /**
      * Returns generated SQL query
      *
      * @return string
@@ -240,6 +256,17 @@ class Builder
     public function toSQL()
     {
         return $this->grammar->compileSelectComponents($this);
+    }
+
+    /**
+     * Retrieve the "count" result of the query.
+     *
+     * @param string $columns
+     * @return int
+     */
+    public function count($columns = '*')
+    {
+        return (int)$this->aggregate(__FUNCTION__, $columns);
     }
 
     /**
@@ -337,7 +364,9 @@ class Builder
     public function orWhere($column, $operator = null, $value = null)
     {
         list($value, $operator) = $this->prepareValueAndOperator(
-            $value, $operator, func_num_args() === 2
+            $value,
+            $operator,
+            func_num_args() === 2
         );
 
         return $this->where($column, $operator, $value, 'or');
@@ -396,7 +425,9 @@ class Builder
         // passed to the method, we will assume that the operator is an equals sign
         // and keep going. Otherwise, we'll require the operator to be passed in.
         list($value, $operator) = $this->prepareValueAndOperator(
-            $value, $operator, func_num_args() === 2
+            $value,
+            $operator,
+            func_num_args() === 2
         );
 
         // If the value is "null", we will just assume the developer wants to add a
@@ -563,6 +594,7 @@ class Builder
                 ->connection
                 ->affectingStatement($query, $payload);
         }
+
         return $this
             ->connection
             ->insert($query, $payload);
@@ -625,7 +657,9 @@ class Builder
         $type = 'Column';
 
         list($second, $operator) = $this->prepareValueAndOperator(
-            $second, $operator, func_num_args() === 2
+            $second,
+            $operator,
+            func_num_args() === 2
         );
 
         $this->wheres[] = compact('type', 'first', 'operator', 'second', 'boolean');
@@ -689,18 +723,6 @@ class Builder
     }
 
     /**
-     * Get the current query value bindings in a flattened array.
-     *
-     * @return array<int, mixed>
-     */
-    public function getBindings()
-    {
-        return array_reduce($this->bindings, function ($bindings, $binding) {
-            return array_merge($bindings, array_values($binding));
-        }, []);
-    }
-
-    /**
      * Apply a mixin to builder class
      *
      * @param Pluggable $pluggable
@@ -752,6 +774,16 @@ class Builder
     }
 
     /**
+     * Get a new instance of the query builder.
+     *
+     * @return Builder
+     */
+    public function newQuery()
+    {
+        return new static($this->connection, $this->grammar);
+    }
+
+    /**
      * Run a truncate statement on the table.
      *
      * @return bool
@@ -759,18 +791,8 @@ class Builder
     public function truncate()
     {
         return $this->connection->statement(
-          $this->grammar->compileTruncate($this)
+            $this->grammar->compileTruncate($this)
         );
-    }
-
-    /**
-     * Get a new instance of the query builder.
-     *
-     * @return Builder
-     */
-    public function newQuery()
-    {
-        return (new static($this->connection, $this->grammar));
     }
 
     /**

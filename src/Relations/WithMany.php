@@ -7,7 +7,7 @@ class WithMany extends WithOneOrMany
     /**
      * Loaded items with under its foreign key
      *
-     * @return array
+     * @return array<string, array<integer, object>>
      */
     protected function loadedItemsDictionary()
     {
@@ -24,9 +24,9 @@ class WithMany extends WithOneOrMany
     /**
      * Get mapped values from dictionary
      *
-     * @param $loadedItems
-     * @param $item
-     * @return array
+     * @param array<string|int, array<integer, object>> $loadedItems
+     * @param object $item
+     * @return array<integer, object>
      */
     protected function getItemFromDictionary($loadedItems, $item)
     {

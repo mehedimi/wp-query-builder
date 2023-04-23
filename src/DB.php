@@ -26,20 +26,36 @@ class DB
     /**
      * Single connection instance
      *
-     * @var Connection
+     * @var Connection|null
      */
     protected static $connection;
 
     /**
      * Set the table which the query is targeting.
      *
-     * @param $table
+     * @param string $table
      * @return Builder
      */
     public static function table($table)
     {
         return (new Builder(self::getConnection()))
             ->from($table);
+    }
+
+    /**
+     * Get the database connection from `$wpdb`
+     *
+     * @return Connection
+     */
+    public static function getConnection()
+    {
+        if (is_null(self::$connection)) {
+            global $wpdb;
+            self::$connection = new Connection($wpdb->__get('dbh'));
+            Grammar::getInstance()->setTablePrefix($wpdb->prefix);
+        }
+
+        return self::$connection;
     }
 
     /**
@@ -54,26 +70,10 @@ class DB
     }
 
     /**
-     * Get the database connection from `$wpdb`
-     *
-     * @return Connection
-     */
-    protected static function getConnection()
-    {
-        if (is_null(self::$connection)) {
-            global $wpdb;
-            self::$connection = new Connection($wpdb->__get('dbh'));
-            Grammar::getInstance()->setTablePrefix($wpdb->prefix);
-        }
-
-        return self::$connection;
-    }
-
-    /**
      * Handle dynamic method calling
      *
-     * @param $name
-     * @param $arguments
+     * @param string $name
+     * @param array<int> $arguments
      * @return Builder
      */
     public static function __callStatic($name, $arguments)

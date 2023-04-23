@@ -7,7 +7,7 @@ class WithOne extends WithOneOrMany
     /**
      * Loaded items with under its foreign key
      *
-     * @return array
+     * @return array<string|int, object>
      */
     protected function loadedItemsDictionary()
     {

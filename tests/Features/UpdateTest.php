@@ -7,7 +7,7 @@ class UpdateTest extends QueryBuilderFeatureTest
     /**
      * @test
      */
-    function it_can_update_a_row()
+    public function it_can_update_a_row()
     {
         $this->ifNeedSkip();
 
@@ -35,7 +35,7 @@ class UpdateTest extends QueryBuilderFeatureTest
     /**
      * @test
      */
-    function it_can_update_one_row_from_2()
+    public function it_can_update_one_row_from_2()
     {
         $this->ifNeedSkip();
         $this->truncate('postmeta');
@@ -71,7 +71,7 @@ class UpdateTest extends QueryBuilderFeatureTest
     /**
      * @test
      */
-    function it_can_update_multiple_rows()
+    public function it_can_update_multiple_rows()
     {
         $this->ifNeedSkip();
         $this->truncate('postmeta');

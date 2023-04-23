@@ -6,6 +6,9 @@ use Mehedi\WPQueryBuilder\Connection;
 use Mehedi\WPQueryBuilder\Query\Builder;
 use Mehedi\WPQueryBuilderTests\FakePlugin;
 use Mockery as m;
+use mysqli;
+use mysqli_result;
+use mysqli_stmt;
 use PHPUnit\Framework\TestCase;
 
 class BuilderTest extends TestCase
@@ -13,7 +16,7 @@ class BuilderTest extends TestCase
     /**
      * @test
      */
-    function it_can_set_table_name()
+    public function it_can_set_table_name()
     {
         $b = $this->builder();
 
@@ -22,10 +25,17 @@ class BuilderTest extends TestCase
         $this->assertEquals('posts', $b->from);
     }
 
+    public function builder($mysqli = null)
+    {
+        $mysqli = $mysqli ?: m::mock(mysqli::class);
+
+        return new Builder(new Connection($mysqli));
+    }
+
     /**
      * @test
      */
-    function it_can_set_columns()
+    public function it_can_set_columns()
     {
         $b = $this->builder();
 
@@ -39,7 +49,7 @@ class BuilderTest extends TestCase
     /**
      * @test
      */
-    function it_can_set_distinct()
+    public function it_can_set_distinct()
     {
         $b = $this->builder();
 
@@ -52,10 +62,10 @@ class BuilderTest extends TestCase
     /**
      * @test
      */
-    function it_can_set_aggregate_function()
+    public function it_can_set_aggregate_function()
     {
-        $mysqli_stmt = m::mock(\mysqli_stmt::class);
-        $mysqli_result = m::mock(\mysqli_result::class);
+        $mysqli_stmt = m::mock(mysqli_stmt::class);
+        $mysqli_result = m::mock(mysqli_result::class);
 
         $mysqli_stmt->shouldReceive('bind_param');
         $mysqli_stmt->shouldReceive('execute');
@@ -64,7 +74,7 @@ class BuilderTest extends TestCase
 
         $mysqli_stmt->shouldReceive('get_result')->andReturn($mysqli_result);
 
-        $mysqli = m::mock(\mysqli::class);
+        $mysqli = m::mock(mysqli::class);
         $mysqli->shouldReceive('prepare')->andReturn($mysqli_stmt);
 
         $b = $this->builder($mysqli);
@@ -79,17 +89,10 @@ class BuilderTest extends TestCase
         $this->assertSame(0, $this->builder($mysqli)->avg('posts'));
     }
 
-    function builder($mysqli = null)
-    {
-        $mysqli = $mysqli ?: m::mock(\mysqli::class);
-
-        return new \Mehedi\WPQueryBuilder\Query\Builder(new Connection($mysqli));
-    }
-
     /**
      * @test
      */
-    function it_can_set_limit()
+    public function it_can_set_limit()
     {
         $b = $this->builder();
 
@@ -103,7 +106,7 @@ class BuilderTest extends TestCase
     /**
      * @test
      */
-    function it_can_set_offset()
+    public function it_can_set_offset()
     {
         $b = $this->builder();
 
@@ -117,7 +120,7 @@ class BuilderTest extends TestCase
     /**
      * @test
      */
-    function it_can_set_basic_where_clause()
+    public function it_can_set_basic_where_clause()
     {
         $b = $this->builder();
 
@@ -127,8 +130,8 @@ class BuilderTest extends TestCase
         $b->where('is_admin', '=', 1);
         $this->assertCount(1, $b->wheres);
         $this->assertEquals(
-            ['type' => 'Basic', 'column' => 'is_admin', 'operator' => '=', 'value' => 1, 'boolean' => 'and'],
-            $b->wheres[0]
+            [['type' => 'Basic', 'column' => 'is_admin', 'operator' => '=', 'value' => 1, 'boolean' => 'and']],
+            $b->wheres
         );
         $this->assertCount(1, $b->bindings['where']);
         $this->assertEquals(1, $b->bindings['where'][0]);
@@ -137,7 +140,7 @@ class BuilderTest extends TestCase
     /**
      * @test
      */
-    function it_can_set_auto_equal_operator_on_basic_where_clause()
+    public function it_can_set_auto_equal_operator_on_basic_where_clause()
     {
         $b = $this->builder();
 
@@ -147,8 +150,8 @@ class BuilderTest extends TestCase
         $b->where('is_admin', 1);
         $this->assertCount(1, $b->wheres);
         $this->assertEquals(
-            ['type' => 'Basic', 'column' => 'is_admin', 'operator' => '=', 'value' => 1, 'boolean' => 'and'],
-            $b->wheres[0]
+            [['type' => 'Basic', 'column' => 'is_admin', 'operator' => '=', 'value' => 1, 'boolean' => 'and']],
+            $b->wheres
         );
         $this->assertCount(1, $b->bindings['where']);
         $this->assertEquals(1, $b->bindings['where'][0]);
@@ -157,7 +160,7 @@ class BuilderTest extends TestCase
     /**
      * @test
      */
-    function it_can_set_basic_or_where_clause()
+    public function it_can_set_basic_or_where_clause()
     {
         $b = $this->builder();
 
@@ -167,8 +170,8 @@ class BuilderTest extends TestCase
         $b->orWhere('is_admin', '=', 1);
         $this->assertCount(1, $b->wheres);
         $this->assertEquals(
-            ['type' => 'Basic', 'column' => 'is_admin', 'operator' => '=', 'value' => 1, 'boolean' => 'or'],
-            $b->wheres[0]
+            [['type' => 'Basic', 'column' => 'is_admin', 'operator' => '=', 'value' => 1, 'boolean' => 'or']],
+            $b->wheres
         );
         $this->assertCount(1, $b->bindings['where']);
         $this->assertEquals(1, $b->bindings['where'][0]);
@@ -177,7 +180,7 @@ class BuilderTest extends TestCase
     /**
      * @test
      */
-    function it_can_set_where_in_clause()
+    public function it_can_set_where_in_clause()
     {
         $b = $this->builder();
 
@@ -188,8 +191,8 @@ class BuilderTest extends TestCase
 
         $this->assertCount(1, $b->wheres);
         $this->assertEquals(
-            ['type' => 'In', 'column' => 'id', 'values' => [2, '3', 8.3], 'boolean' => 'and'],
-            $b->wheres[0]
+            [['type' => 'In', 'column' => 'id', 'values' => [2, '3', 8.3], 'boolean' => 'and']],
+            $b->wheres
         );
         $this->assertCount(3, $b->bindings['where']);
         $this->assertEquals([2, '3', 8.3], $b->bindings['where']);
@@ -198,7 +201,7 @@ class BuilderTest extends TestCase
     /**
      * @test
      */
-    function it_can_set_where_not_in_clause()
+    public function it_can_set_where_not_in_clause()
     {
         $b = $this->builder();
 
@@ -209,8 +212,8 @@ class BuilderTest extends TestCase
 
         $this->assertCount(1, $b->wheres);
         $this->assertEquals(
-            ['type' => 'NotIn', 'column' => 'id', 'values' => [2, '3', 8.3], 'boolean' => 'and'],
-            $b->wheres[0]
+            [['type' => 'NotIn', 'column' => 'id', 'values' => [2, '3', 8.3], 'boolean' => 'and']],
+            $b->wheres
         );
         $this->assertCount(3, $b->bindings['where']);
         $this->assertEquals([2, '3', 8.3], $b->bindings['where']);
@@ -219,7 +222,7 @@ class BuilderTest extends TestCase
     /**
      * @test
      */
-    function it_can_set_where_null_clause()
+    public function it_can_set_where_null_clause()
     {
         $b = $this->builder();
 
@@ -230,8 +233,8 @@ class BuilderTest extends TestCase
 
         $this->assertCount(1, $b->wheres);
         $this->assertEquals(
-            ['type' => 'Null', 'column' => 'name', 'boolean' => 'and'],
-            $b->wheres[0]
+            [['type' => 'Null', 'column' => 'name', 'boolean' => 'and']],
+            $b->wheres
         );
 
         $b = $this->builder();
@@ -243,15 +246,15 @@ class BuilderTest extends TestCase
 
         $this->assertCount(1, $b->wheres);
         $this->assertEquals(
-            ['type' => 'Null', 'column' => 'name', 'boolean' => 'or'],
-            $b->wheres[0]
+            [['type' => 'Null', 'column' => 'name', 'boolean' => 'or']],
+            $b->wheres
         );
     }
 
     /**
      * @test
      */
-    function it_can_set_where_not_null_clause()
+    public function it_can_set_where_not_null_clause()
     {
         $b = $this->builder();
 
@@ -262,8 +265,8 @@ class BuilderTest extends TestCase
 
         $this->assertCount(1, $b->wheres);
         $this->assertEquals(
-            ['type' => 'NotNull', 'column' => 'name', 'boolean' => 'and'],
-            $b->wheres[0]
+            [['type' => 'NotNull', 'column' => 'name', 'boolean' => 'and']],
+            $b->wheres
         );
 
         $b = $this->builder();
@@ -275,15 +278,15 @@ class BuilderTest extends TestCase
 
         $this->assertCount(1, $b->wheres);
         $this->assertEquals(
-            ['type' => 'NotNull', 'column' => 'name', 'boolean' => 'or'],
-            $b->wheres[0]
+            [['type' => 'NotNull', 'column' => 'name', 'boolean' => 'or']],
+            $b->wheres
         );
     }
 
     /**
      * @test
      */
-    function it_can_set_where_null_clause_with_multiple_columns()
+    public function it_can_set_where_null_clause_with_multiple_columns()
     {
         $b = $this->builder();
 
@@ -294,19 +297,18 @@ class BuilderTest extends TestCase
 
         $this->assertCount(2, $b->wheres);
         $this->assertEquals(
-            ['type' => 'Null', 'column' => 'name', 'boolean' => 'and'],
-            $b->wheres[0]
-        );
-        $this->assertEquals(
-            ['type' => 'Null', 'column' => 'address', 'boolean' => 'and'],
-            $b->wheres[1]
+            [
+                ['type' => 'Null', 'column' => 'name', 'boolean' => 'and'],
+                ['type' => 'Null', 'column' => 'address', 'boolean' => 'and']
+            ],
+            $b->wheres
         );
     }
 
     /**
      * @test
      */
-    function it_can_set_where_not_null_clause_with_multiple_columns()
+    public function it_can_set_where_not_null_clause_with_multiple_columns()
     {
         $b = $this->builder();
 
@@ -317,19 +319,18 @@ class BuilderTest extends TestCase
 
         $this->assertCount(2, $b->wheres);
         $this->assertEquals(
-            ['type' => 'NotNull', 'column' => 'name', 'boolean' => 'and'],
-            $b->wheres[0]
-        );
-        $this->assertEquals(
-            ['type' => 'NotNull', 'column' => 'address', 'boolean' => 'and'],
-            $b->wheres[1]
+            [
+                ['type' => 'NotNull', 'column' => 'name', 'boolean' => 'and'],
+                ['type' => 'NotNull', 'column' => 'address', 'boolean' => 'and']
+            ],
+            $b->wheres
         );
     }
 
     /**
      * @test
      */
-    function it_can_where_null_data_using_where_clause()
+    public function it_can_where_null_data_using_where_clause()
     {
         $b = $this->builder();
 
@@ -340,15 +341,15 @@ class BuilderTest extends TestCase
 
         $this->assertCount(1, $b->wheres);
         $this->assertEquals(
-            ['type' => 'Null', 'column' => 'name', 'boolean' => 'and'],
-            $b->wheres[0]
+            [['type' => 'Null', 'column' => 'name', 'boolean' => 'and']],
+            $b->wheres
         );
     }
 
     /**
      * @test
      */
-    function it_can_where_between_clause()
+    public function it_can_where_between_clause()
     {
         $b = $this->builder();
 
@@ -359,15 +360,15 @@ class BuilderTest extends TestCase
 
         $this->assertCount(1, $b->wheres);
         $this->assertEquals(
-            ['type' => 'Between', 'column' => 'amount', 'values' => [1, 10], 'boolean' => 'and', 'not' => false],
-            $b->wheres[0]
+            [['type' => 'Between', 'column' => 'amount', 'values' => [1, 10], 'boolean' => 'and', 'not' => false]],
+            $b->wheres
         );
     }
 
     /**
      * @test
      */
-    function where_between_can_work_on_associative_range_clause()
+    public function where_between_can_work_on_associative_range_clause()
     {
         $b = $this->builder();
 
@@ -378,15 +379,15 @@ class BuilderTest extends TestCase
 
         $this->assertCount(1, $b->wheres);
         $this->assertEquals(
-            ['type' => 'Between', 'column' => 'amount', 'values' => [2, 45], 'boolean' => 'and', 'not' => false],
-            $b->wheres[0]
+            [['type' => 'Between', 'column' => 'amount', 'values' => [2, 45], 'boolean' => 'and', 'not' => false]],
+            $b->wheres
         );
     }
 
     /**
      * @test
      */
-    function it_should_have_insert_method()
+    public function it_should_have_insert_method()
     {
         $this->assertEquals(true, method_exists($this->builder(), 'insert'));
     }
@@ -394,7 +395,7 @@ class BuilderTest extends TestCase
     /**
      * @test
      */
-    function it_should_have_update_method()
+    public function it_should_have_update_method()
     {
         $this->assertEquals(true, method_exists($this->builder(), 'update'));
     }
@@ -402,7 +403,7 @@ class BuilderTest extends TestCase
     /**
      * @test
      */
-    function it_should_have_delete_method()
+    public function it_should_have_delete_method()
     {
         $this->assertEquals(true, method_exists($this->builder(), 'delete'));
     }
@@ -410,7 +411,7 @@ class BuilderTest extends TestCase
     /**
      * @test
      */
-    function it_should_have_first_method()
+    public function it_should_have_first_method()
     {
         $this->assertEquals(true, method_exists($this->builder(), 'first'));
     }
@@ -418,7 +419,7 @@ class BuilderTest extends TestCase
     /**
      * @test
      */
-    function it_can_use_order_by_clause()
+    public function it_can_use_order_by_clause()
     {
         $builder = $this->builder()
             ->from('posts')
@@ -431,7 +432,7 @@ class BuilderTest extends TestCase
     /**
      * @test
      */
-    function it_can_set_where_columns()
+    public function it_can_set_where_columns()
     {
         $builder = $this->builder()
             ->from('posts')
@@ -444,7 +445,7 @@ class BuilderTest extends TestCase
     /**
      * @test
      */
-    function it_can_add_join_clause()
+    public function it_can_add_join_clause()
     {
         $builder = $this->builder()
             ->from('posts')
@@ -456,7 +457,7 @@ class BuilderTest extends TestCase
     /**
      * @test
      */
-    function it_can_add_mixin()
+    public function it_can_add_mixin()
     {
         $i = false;
 
@@ -475,7 +476,7 @@ class BuilderTest extends TestCase
     /**
      * @test
      */
-    function it_can_add_grouping_columns()
+    public function it_can_add_grouping_columns()
     {
         $builder = $this->builder()->groupBy('ID')->groupBy('post_id', 'asc');
 
@@ -487,7 +488,7 @@ class BuilderTest extends TestCase
     /**
      * @test
      */
-    function it_can_add_nested_where()
+    public function it_can_add_nested_where()
     {
         $builder = $this->builder()->whereNested(function (Builder $builder) {
             $builder->where('ID', 1);

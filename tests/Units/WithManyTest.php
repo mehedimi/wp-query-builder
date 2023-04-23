@@ -4,20 +4,15 @@ namespace Mehedi\WPQueryBuilderTests\Units;
 
 use Mehedi\WPQueryBuilder\Query\Builder;
 use Mehedi\WPQueryBuilder\Relations\WithMany;
-use PHPUnit\Framework\TestCase;
 use Mockery as m;
+use PHPUnit\Framework\TestCase;
 
 class WithManyTest extends TestCase
 {
-    function builder()
-    {
-        return new Builder();
-    }
-
     /**
      * @test
      */
-    function it_can_add_with_one_query()
+    public function it_can_add_with_one_query()
     {
         $builder = $this->builder()
             ->from('posts')
@@ -29,17 +24,22 @@ class WithManyTest extends TestCase
         $this->assertInstanceOf(WithMany::class, $builder->with[0]);
     }
 
+    public function builder()
+    {
+        return new Builder();
+    }
+
     /**
      * @test
      */
-    function it_can_handle_with_one_query()
+    public function it_can_handle_with_one_query()
     {
         $posts = [
-            (object) [
+            (object)[
                 'ID' => 1,
                 'name' => 'some'
             ],
-            (object) [
+            (object)[
                 'ID' => 2,
                 'name' => 'some'
             ]
@@ -53,7 +53,7 @@ class WithManyTest extends TestCase
         ];
 
         $expectation = [
-            (object) [
+            (object)[
                 'ID' => 1,
                 'name' => 'some',
                 'meta' => [(object)[
@@ -61,7 +61,7 @@ class WithManyTest extends TestCase
                     'value' => 'something'
                 ]]
             ],
-            (object) [
+            (object)[
                 'ID' => 2,
                 'name' => 'some',
                 'meta' => []

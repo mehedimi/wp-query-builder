@@ -20,6 +20,12 @@ abstract class WithOneOrMany extends Relation
      */
     protected $localKey;
 
+    /**
+     * @param string $name
+     * @param string $foreignKey
+     * @param string $localKey
+     * @param Builder $builder
+     */
     public function __construct($name, $foreignKey, $localKey, Builder $builder)
     {
         $this->foreignKey = $foreignKey;
@@ -31,7 +37,7 @@ abstract class WithOneOrMany extends Relation
     /**
      * Get loaded items
      *
-     * @return array
+     * @return array<integer, object>
      */
     protected function getLoadedItems()
     {
@@ -41,7 +47,7 @@ abstract class WithOneOrMany extends Relation
     /**
      * Extract foreign key values
      *
-     * @return array
+     * @return array<int, string>
      */
     protected function extractKeyValues()
     {

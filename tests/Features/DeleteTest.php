@@ -7,7 +7,7 @@ class DeleteTest extends QueryBuilderFeatureTest
     /**
      * @test
      */
-    function it_can_delete_a_single_item()
+    public function it_can_delete_a_single_item()
     {
         $this->ifNeedSkip();
         $this->truncate('postmeta');
@@ -31,7 +31,7 @@ class DeleteTest extends QueryBuilderFeatureTest
     /**
      * @test
      */
-    function it_can_delete_many_rows()
+    public function it_can_delete_many_rows()
     {
         $this->ifNeedSkip();
         $this->truncate('postmeta');

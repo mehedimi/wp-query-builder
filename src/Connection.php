@@ -2,11 +2,12 @@
 
 namespace Mehedi\WPQueryBuilder;
 
-use mysqli;
 use Closure;
+use Mehedi\WPQueryBuilder\Exceptions\QueryException;
+use mysqli;
 use mysqli_result;
 use mysqli_sql_exception;
-use Mehedi\WPQueryBuilder\Exceptions\QueryException;
+use mysqli_stmt;
 
 class Connection
 {
@@ -20,7 +21,7 @@ class Connection
     /**
      * Query logs
      *
-     * @var array
+     * @var array<int, array<string, string>>|null
      */
     protected $queryLogs;
 
@@ -42,30 +43,11 @@ class Connection
     }
 
     /**
-     * Run a SQL statement and log its execution context.
-     *
-     * @param $query
-     * @param $bindings
-     * @param Closure $callback
-     * @return mixed
-     */
-    protected function run($query, $bindings, Closure $callback)
-    {
-        $start = microtime(true);
-
-        $result = call_user_func($callback, $query, $bindings);
-
-        $this->logQuery($query, $bindings, $this->getElapsedTime($start));
-
-        return $result;
-    }
-
-    /**
      * Run a select statement against the database.
      *
      * @param string $query
-     * @param array $bindings
-     * @return array
+     * @param array<int, mixed> $bindings
+     * @return array<int, object>
      */
     public function select($query, $bindings = [])
     {
@@ -98,10 +80,82 @@ class Connection
     }
 
     /**
+     * Run a SQL statement and log its execution context.
+     *
+     * @param string $query
+     * @param array<int, mixed> $bindings
+     * @param Closure $callback
+     * @return mixed
+     */
+    protected function run($query, $bindings, Closure $callback)
+    {
+        $start = microtime(true);
+
+        $result = call_user_func($callback, $query, $bindings);
+
+        $this->logQuery($query, $bindings, $this->getElapsedTime($start));
+
+        return $result;
+    }
+
+    /**
+     * Log a query in the connection's query log.
+     *
+     * @param string $query
+     * @param array<int, mixed> $bindings
+     * @param float $time
+     * @return void
+     */
+    protected function logQuery($query, $bindings, $time)
+    {
+        if ($this->loggingQueries) {
+            $this->queryLogs[] = compact('query', 'bindings', 'time');
+        }
+    }
+
+    /**
+     * Get the elapsed time since a given starting point.
+     *
+     * @param float $start
+     * @return float
+     */
+    protected function getElapsedTime($start)
+    {
+        return round((microtime(true) - $start) * 1000, 2);
+    }
+
+    /**
+     * Bind values to their parameters in the given statement.
+     *
+     * @param mysqli_stmt $statement
+     * @param array<int, mixed> $bindings
+     * @return void
+     */
+    protected function bindValues($statement, $bindings)
+    {
+        if (empty($bindings)) {
+            return;
+        }
+
+        $types = array_reduce($bindings, function ($carry, $value) {
+            if (is_int($value)) {
+                return $carry . 'i';
+            }
+            if (is_float($value)) {
+                return $carry . 'd';
+            }
+
+            return $carry . 's';
+        }, '');
+
+        $statement->bind_param($types, ...$bindings);
+    }
+
+    /**
      * Get rows from mysqli_result
      *
      * @param mysqli_result $result
-     * @return array
+     * @return array<int, object>
      */
     protected function getRowsFromResult(mysqli_result $result)
     {
@@ -111,16 +165,27 @@ class Connection
     }
 
     /**
+     * Run an insert statement against the database.
+     *
+     * @param string $query
+     * @param array<int, mixed> $bindings
+     * @return bool
+     */
+    public function insert($query, $bindings = [])
+    {
+        return $this->statement($query, $bindings);
+    }
+
+    /**
      * Execute an SQL statement and return the boolean result.
      *
      * @param string $query
-     * @param array $bindings
+     * @param array<int, mixed> $bindings
      * @return bool
      */
     public function statement($query, $bindings = [])
     {
         return $this->run($query, $bindings, function ($query, $bindings) {
-
             try {
                 $statement = $this->mysqli->prepare($query);
             } catch (mysqli_sql_exception $e) {
@@ -138,10 +203,22 @@ class Connection
     }
 
     /**
+     * Run update query with affected rows
+     *
+     * @param string $query
+     * @param array<int, mixed> $bindings
+     * @return int
+     */
+    public function update($query, $bindings = [])
+    {
+        return $this->affectingStatement($query, $bindings);
+    }
+
+    /**
      * Run an SQL statement and get the number of rows affected.
      *
      * @param string $query
-     * @param array $bindings
+     * @param array<int, mixed> $bindings
      * @return int
      */
     public function affectingStatement($query, $bindings = [])
@@ -156,7 +233,6 @@ class Connection
                 throw new QueryException($e->getMessage());
             }
 
-
             if (false === $statement) {
                 throw new QueryException($this->mysqli->error);
             }
@@ -170,91 +246,15 @@ class Connection
     }
 
     /**
-     * Run an insert statement against the database.
-     *
-     * @param string $query
-     * @param array $bindings
-     * @return bool
-     */
-    public function insert($query, $bindings = [])
-    {
-        return $this->statement($query, $bindings);
-    }
-
-    /**
-     * Run update query with affected rows
-     *
-     * @param $query
-     * @param $bindings
-     * @return int
-     */
-    public function update($query, $bindings = [])
-    {
-        return $this->affectingStatement($query, $bindings);
-    }
-
-    /**
      * Run delete query with affected rows
      *
-     * @param $query
-     * @param $bindings
+     * @param string $query
+     * @param array<int, mixed> $bindings
      * @return int
      */
     public function delete($query, $bindings = [])
     {
         return $this->affectingStatement($query, $bindings);
-    }
-
-    /**
-     * Bind values to their parameters in the given statement.
-     *
-     * @param \mysqli_stmt $statement
-     * @param array $bindings
-     * @return void
-     */
-    protected function bindValues($statement, $bindings)
-    {
-        if (empty($bindings)) {
-            return;
-        }
-
-        $types = array_reduce($bindings, function ($carry, $value) {
-            if (is_int($value)) {
-                return $carry . 'i';
-            }
-            if (is_float($value)) {
-                return $carry . 'd';
-            }
-            return $carry . 's';
-        }, '');
-
-        $statement->bind_param($types, ...$bindings);
-    }
-
-    /**
-     * Get the elapsed time since a given starting point.
-     *
-     * @param int $start
-     * @return float
-     */
-    protected function getElapsedTime($start)
-    {
-        return round((microtime(true) - $start) * 1000, 2);
-    }
-
-    /**
-     * Log a query in the connection's query log.
-     *
-     * @param string $query
-     * @param array $bindings
-     * @param float $time
-     * @return void
-     */
-    protected function logQuery($query, $bindings, $time)
-    {
-        if ($this->loggingQueries) {
-            $this->queryLogs[] = compact('query', 'bindings', 'time');
-        }
     }
 
     /**
@@ -280,7 +280,7 @@ class Connection
     /**
      * Get the connection query logs.
      *
-     * @return array
+     * @return array<int, array<string, string>>|null
      */
     public function getQueryLog()
     {

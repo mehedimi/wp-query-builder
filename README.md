@@ -18,6 +18,7 @@ WP Query Builder is package for developers, which can simplify query writing exp
     - [Ordering](#ordering)
     - [Grouping](#grouping)
     - [Limit & Offset](#limit-and-offset)
+- [Database Transactions](#database-transactions)
 - [Defining Relationships (On Demand)](#defining-relationships)
     - [One To One](#one-to-one)
     - [One To Many](#one-to-many)
@@ -463,7 +464,44 @@ $users = DB::table('users')
                 ->limit(5)
                 ->get();
 ```
+<a name="database-transactions"></a>
+## Database Transactions
 
+You may use the `transaction` method provided by the `DB` class to run a set of operations within a database transaction. If an exception is thrown within the transaction closure, the transaction will automatically be rolled back. If the closure executes successfully, the transaction will automatically be committed. You don't need to worry about manually rolling back or committing while using the `transaction` method:
+```php
+DB::transaction(function () {
+    DB::table('posts')->where('ID', 2)->update(['title' => 'new title']);
+
+    DB::table('posts')->where('ID', 4)->delete();
+});
+```
+<a name="manually-using-transactions"></a>
+#### Manually Using Transactions
+
+If you would like to begin a transaction manually and have complete control over rollbacks and commits, you may use the `beginTransaction` method provided by the `DB` facade:
+```php
+DB::beginTransaction();
+```
+
+You can rollback the transaction via the `rollback` method:
+```php
+DB::rollback();
+```
+Lastly, you can commit a transaction via the `commit` method:
+```php
+DB::commit();
+```
+> **Note**  
+> All the 4 methods support `$flags` and `$name` parameter supported by `mysqli`, like bellow:
+```php
+DB::beginTransaction(MYSQLI_TRANS_START_READ_WRITE, 'some-random-name');
+DB::commit(MYSQLI_TRANS_START_READ_WRITE, 'some-random-name');
+DB::rollback(MYSQLI_TRANS_START_READ_WRITE, 'some-random-name');
+DB::transaction(function () {
+    // Do something
+}, MYSQLI_TRANS_START_READ_WRITE, 'some-random-name');
+```
+ 
 <a name="defining-relationships"></a>
 
 ## Defining Relationships

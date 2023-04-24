@@ -16,6 +16,10 @@ use Mehedi\WPQueryBuilder\Query\Grammar;
  * @method static void enableQueryLog()
  * @method static void disableQueryLog()
  * @method static array getQueryLog()
+ * @method static bool beginTransaction($flags = 0, $name = null)
+ * @method static bool commit($flags = 0, $name = null)
+ * @method static bool rollback($flags = 0, $name = null)
+ * @method static bool transaction(callable $callback, $flags = 0, $name = null)
  *
  * @see Connection
  */

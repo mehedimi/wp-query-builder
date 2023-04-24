@@ -3,14 +3,23 @@
 namespace Mehedi\WPQueryBuilder;
 
 use Closure;
+use Exception;
+use Mehedi\WPQueryBuilder\Concerns\ForwardsCalls;
 use Mehedi\WPQueryBuilder\Exceptions\QueryException;
 use mysqli;
 use mysqli_result;
 use mysqli_sql_exception;
 use mysqli_stmt;
 
+/**
+ * @method bool beginTransaction($flags = 0, $name = null)
+ * @method bool commit($flags = 0, $name = null)
+ * @method bool rollback($flags = 0, $name = null)
+ */
 class Connection
 {
+    use ForwardsCalls;
+
     /**
      * Mysqli connection instance
      *
@@ -285,5 +294,41 @@ class Connection
     public function getQueryLog()
     {
         return $this->queryLogs;
+    }
+
+    /**
+     * Execute a callback within a transaction
+     *
+     * @param callable $callback
+     * @param int $flags
+     * @param string|null $name
+     * @return false|mixed
+     */
+    public function transaction(callable $callback, $flags = 0, $name = null)
+    {
+        try {
+            $result = call_user_func($callback);
+            $this->commit($flags, $name);
+            return $result;
+        } catch (Exception $e) {
+            $this->rollback($flags, $name);
+            return false;
+        }
+    }
+
+    /**
+     * @param string $name
+     * @param array<int, string> $arguments
+     * @return bool
+     */
+    public function __call($name, $arguments)
+    {
+        if (!preg_match('/^(beginTransaction|commit|rollback)$/', $name)) {
+            self::throwBadMethodCallException($name);
+        }
+
+        $name = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $name));
+
+        return call_user_func_array([$this->mysqli, $name], $arguments);
     }
 }

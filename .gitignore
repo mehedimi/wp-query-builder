@@ -10,3 +10,4 @@ vendor
 node_modules
 .phpunit.cache
 .env
+.DS_Store

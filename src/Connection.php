@@ -30,7 +30,7 @@ class Connection
     /**
      * Query logs
      *
-     * @var array<int, array<string, string>>|null
+     * @var array<int, array<string, string|int|float>>|null
      */
     protected $queryLogs;
 
@@ -111,7 +111,7 @@ class Connection
      * Log a query in the connection's query log.
      *
      * @param string $query
-     * @param array<int, mixed> $bindings
+     * @param array<int, string|int> $bindings
      * @param float $time
      * @return void
      */
@@ -289,7 +289,7 @@ class Connection
     /**
      * Get the connection query logs.
      *
-     * @return array<int, array<string, string>>|null
+     * @return array<int, array<string, string|int|float>>|null
      */
     public function getQueryLog()
     {

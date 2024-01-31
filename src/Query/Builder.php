@@ -126,7 +126,7 @@ class Builder
     /**
      * Connection instance
      *
-     * @var Connection
+     * @var Connection | null
      */
     protected $connection;
 
@@ -135,7 +135,7 @@ class Builder
      *
      * @param Grammar|null $grammar
      */
-    public function __construct(Connection $connection = null, Grammar $grammar = null)
+    public function __construct(Connection $connection, Grammar $grammar = null)
     {
         $this->connection = $connection;
         $this->grammar = $grammar ?: Grammar::getInstance();

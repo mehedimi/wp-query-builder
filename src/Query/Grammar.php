@@ -23,7 +23,7 @@ class Grammar
      *
      * @var string[]
      */
-    protected $selectComponents = [
+    protected static $selectComponents = [
         'aggregate',
         'columns',
         'from',
@@ -59,7 +59,7 @@ class Grammar
     {
         $sql = ['select' . ($builder->distinct ? ' distinct' : '')];
 
-        foreach ($this->selectComponents as $component) {
+        foreach (self::$selectComponents as $component) {
             if (isset($builder->{$component})) {
                 $sql[$component] = call_user_func(
                     [$this, 'compile' . ucfirst($component)],
@@ -343,6 +343,11 @@ class Grammar
     protected function compileLimit(Builder $builder, $limit)
     {
         return 'limit ' . $limit;
+    }
+
+    protected function compileGroupLimit(Builder $builder)
+    {
+
     }
 
     /**

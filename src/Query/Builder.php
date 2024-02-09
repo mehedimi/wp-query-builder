@@ -65,6 +65,13 @@ class Builder
     public $limit;
 
     /**
+     * The maximum number of records to return per group.
+     *
+     * @var array<int, string | int>
+     */
+    public $groupLimit;
+
+    /**
      * The number of records to skip.
      *
      * @var int
@@ -349,6 +356,20 @@ class Builder
     public function limit($value)
     {
         $this->limit = !is_null($value) ? (int)$value : null;
+
+        return $this;
+    }
+
+    /**
+     * Add a "group limit" clause to the query.
+     *
+     * @param int $value
+     * @param string $column
+     * @return $this
+     */
+    public function groupLimit($value, $column)
+    {
+        $this->groupLimit = [$column, $value];
 
         return $this;
     }

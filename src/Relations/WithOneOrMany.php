@@ -53,4 +53,17 @@ abstract class WithOneOrMany extends Relation
     {
         return array_column($this->items, $this->localKey);
     }
+
+    /**
+     * Set the limit over related records
+     *
+     * @param int $count
+     * @return $this
+     */
+    public function limit($count)
+    {
+        $this->builder->groupLimit($count, $this->foreignKey);
+
+        return $this;
+    }
 }

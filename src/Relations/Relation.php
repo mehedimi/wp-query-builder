@@ -3,6 +3,7 @@
 namespace Mehedi\WPQueryBuilder\Relations;
 
 use Mehedi\WPQueryBuilder\Concerns\ForwardsCalls;
+use Mehedi\WPQueryBuilder\DB;
 use Mehedi\WPQueryBuilder\Query\Builder;
 
 /**
@@ -40,7 +41,7 @@ abstract class Relation
     public function __construct($name, Builder $builder = null)
     {
         $this->name = $name;
-        $this->builder = $builder ?: new Builder();
+        $this->builder = $builder ?: new Builder(DB::getConnection());
     }
 
     /**

@@ -2,6 +2,8 @@
 
 namespace Mehedi\WPQueryBuilder\Query;
 
+use Mehedi\WPQueryBuilder\Connection;
+
 class Join extends Builder
 {
     /**
@@ -24,13 +26,14 @@ class Join extends Builder
      * @param string $table
      * @param string $type
      * @param Grammar|null $grammar
+     * @param Connection $connection
      */
-    public function __construct($table, $type, Grammar $grammar = null)
+    public function __construct($table, $type, Connection $connection, Grammar $grammar = null)
     {
         $this->table = $table;
         $this->type = $type;
 
-        parent::__construct($this->connection, $grammar);
+        parent::__construct($connection, $grammar);
     }
 
     /**

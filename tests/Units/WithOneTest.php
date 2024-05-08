@@ -2,6 +2,7 @@
 
 namespace Mehedi\WPQueryBuilderTests\Units;
 
+use Mehedi\WPQueryBuilder\Connection;
 use Mehedi\WPQueryBuilder\Query\Builder;
 use Mehedi\WPQueryBuilder\Relations\WithOne;
 use Mockery as m;
@@ -26,7 +27,7 @@ class WithOneTest extends TestCase
 
     public function builder()
     {
-        return new Builder();
+        return new Builder(new Connection(m::mock(\mysqli::class)));
     }
 
     /**

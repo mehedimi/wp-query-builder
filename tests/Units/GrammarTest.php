@@ -447,7 +447,7 @@ class GrammarTest extends TestCase
     {
         Grammar::getInstance()->setTablePrefix('wp_');
 
-        $b = new Builder(null, Grammar::getInstance());
+        $b = new Builder(new Connection(m::mock(mysqli::class)), Grammar::getInstance());
 
         $b->from('posts');
 
@@ -461,7 +461,7 @@ class GrammarTest extends TestCase
     {
         Grammar::getInstance()->setTablePrefix('wp_');
 
-        $b = new Builder(null, Grammar::getInstance());
+        $b = new Builder(new Connection(m::mock(mysqli::class)), Grammar::getInstance());
 
         $b->from('posts');
 

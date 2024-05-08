@@ -30,7 +30,7 @@ class Connection
     /**
      * Query logs
      *
-     * @var array<int, array<string, string|int|float>>|null
+     * @var array<int, array<string, array<int, int|string>|float|int|string>>|null
      */
     protected $queryLogs;
 
@@ -289,7 +289,7 @@ class Connection
     /**
      * Get the connection query logs.
      *
-     * @return array<int, array<string, string|int|float>>|null
+     * @return array<int, array<string, array<int, int|string>|float|int|string>>|null
      */
     public function getQueryLog()
     {
@@ -327,8 +327,10 @@ class Connection
             self::throwBadMethodCallException($name);
         }
 
+        // @phpstan-ignore-next-line
         $name = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $name));
 
+        // @phpstan-ignore-next-line
         return call_user_func_array([$this->mysqli, $name], $arguments);
     }
 }

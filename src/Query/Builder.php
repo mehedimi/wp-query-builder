@@ -60,14 +60,14 @@ class Builder
     /**
      * The maximum number of records to return.
      *
-     * @var int
+     * @var int | null
      */
     public $limit;
 
     /**
      * The number of records to skip.
      *
-     * @var int
+     * @var int | null
      */
     public $offset;
 
@@ -126,7 +126,7 @@ class Builder
     /**
      * Connection instance
      *
-     * @var Connection | null
+     * @var Connection
      */
     protected $connection;
 
@@ -191,7 +191,7 @@ class Builder
 
         $data = $this->get();
 
-        if (empty($data)) {
+        if (empty($data) || !isset($data[0]->aggregate)) {
             return 0;
         }
 
@@ -356,7 +356,7 @@ class Builder
     /**
      * Add an "or where" clause to the query.
      *
-     * @param Closure|string|array<int, mixed> $column
+     * @param string $column
      * @param mixed $operator
      * @param mixed $value
      * @return $this
@@ -375,7 +375,7 @@ class Builder
     /**
      * Prepare the value and operator for a where clause.
      *
-     * @param string $value
+     * @param string|numeric $value
      * @param string $operator
      * @param bool $useDefault
      * @return array<int, mixed>
@@ -425,8 +425,8 @@ class Builder
         // passed to the method, we will assume that the operator is an equals sign
         // and keep going. Otherwise, we'll require the operator to be passed in.
         list($value, $operator) = $this->prepareValueAndOperator(
-            $value,
-            $operator,
+            $value, // @phpstan-ignore-line
+            $operator, // @phpstan-ignore-line
             func_num_args() === 2
         );
 
@@ -657,8 +657,8 @@ class Builder
         $type = 'Column';
 
         list($second, $operator) = $this->prepareValueAndOperator(
-            $second,
-            $operator,
+            $second, // @phpstan-ignore-line
+            $operator, // @phpstan-ignore-line
             func_num_args() === 2
         );
 
@@ -693,11 +693,11 @@ class Builder
      */
     public function join($table, $first = null, $operator = null, $second = null, $type = 'inner')
     {
-        $join = new Join($table, $type);
+        $join = new Join($table, $type, $this->connection);
 
         if ($first instanceof Closure) {
             $first($join);
-        } else {
+        } else if (!is_null($first)) {
             $join->on($first, $operator, $second);
         }
 

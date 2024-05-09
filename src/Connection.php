@@ -30,7 +30,7 @@ class Connection
     /**
      * Query logs
      *
-     * @var array<int, array<string, string>>|null
+     * @var array<int, array<string, array<int, int|string>|float|int|string>>|null
      */
     protected $queryLogs;
 
@@ -43,8 +43,6 @@ class Connection
 
     /**
      * Create a new connection instance using mysqli connection from $wpdb
-     *
-     * @param mysqli $mysqli
      */
     public function __construct(mysqli $mysqli)
     {
@@ -54,8 +52,8 @@ class Connection
     /**
      * Run a select statement against the database.
      *
-     * @param string $query
-     * @param array<int, mixed> $bindings
+     * @param  string  $query
+     * @param  array<int, mixed>  $bindings
      * @return array<int, object>
      */
     public function select($query, $bindings = [])
@@ -70,7 +68,7 @@ class Connection
                 throw new QueryException($e->getMessage(), $e->getCode());
             }
 
-            if (false === $statement) {
+            if ($statement === false) {
                 throw new QueryException($this->mysqli->error);
             }
 
@@ -91,9 +89,8 @@ class Connection
     /**
      * Run a SQL statement and log its execution context.
      *
-     * @param string $query
-     * @param array<int, mixed> $bindings
-     * @param Closure $callback
+     * @param  string  $query
+     * @param  array<int, mixed>  $bindings
      * @return mixed
      */
     protected function run($query, $bindings, Closure $callback)
@@ -110,9 +107,9 @@ class Connection
     /**
      * Log a query in the connection's query log.
      *
-     * @param string $query
-     * @param array<int, mixed> $bindings
-     * @param float $time
+     * @param  string  $query
+     * @param  array<int, string|int>  $bindings
+     * @param  float  $time
      * @return void
      */
     protected function logQuery($query, $bindings, $time)
@@ -125,7 +122,7 @@ class Connection
     /**
      * Get the elapsed time since a given starting point.
      *
-     * @param float $start
+     * @param  float  $start
      * @return float
      */
     protected function getElapsedTime($start)
@@ -136,8 +133,8 @@ class Connection
     /**
      * Bind values to their parameters in the given statement.
      *
-     * @param mysqli_stmt $statement
-     * @param array<int, mixed> $bindings
+     * @param  mysqli_stmt  $statement
+     * @param  array<int, mixed>  $bindings
      * @return void
      */
     protected function bindValues($statement, $bindings)
@@ -148,13 +145,13 @@ class Connection
 
         $types = array_reduce($bindings, function ($carry, $value) {
             if (is_int($value)) {
-                return $carry . 'i';
+                return $carry.'i';
             }
             if (is_float($value)) {
-                return $carry . 'd';
+                return $carry.'d';
             }
 
-            return $carry . 's';
+            return $carry.'s';
         }, '');
 
         $statement->bind_param($types, ...$bindings);
@@ -163,21 +160,20 @@ class Connection
     /**
      * Get rows from mysqli_result
      *
-     * @param mysqli_result $result
      * @return array<int, object>
      */
     protected function getRowsFromResult(mysqli_result $result)
     {
         return array_map(function ($row) {
-            return (object)$row;
+            return (object) $row;
         }, $result->fetch_all(MYSQLI_ASSOC));
     }
 
     /**
      * Run an insert statement against the database.
      *
-     * @param string $query
-     * @param array<int, mixed> $bindings
+     * @param  string  $query
+     * @param  array<int, mixed>  $bindings
      * @return bool
      */
     public function insert($query, $bindings = [])
@@ -188,8 +184,8 @@ class Connection
     /**
      * Execute an SQL statement and return the boolean result.
      *
-     * @param string $query
-     * @param array<int, mixed> $bindings
+     * @param  string  $query
+     * @param  array<int, mixed>  $bindings
      * @return bool
      */
     public function statement($query, $bindings = [])
@@ -201,7 +197,7 @@ class Connection
                 throw new QueryException($e->getMessage());
             }
 
-            if (false === $statement) {
+            if ($statement === false) {
                 throw new QueryException($this->mysqli->error);
             }
 
@@ -214,8 +210,8 @@ class Connection
     /**
      * Run update query with affected rows
      *
-     * @param string $query
-     * @param array<int, mixed> $bindings
+     * @param  string  $query
+     * @param  array<int, mixed>  $bindings
      * @return int
      */
     public function update($query, $bindings = [])
@@ -226,8 +222,8 @@ class Connection
     /**
      * Run an SQL statement and get the number of rows affected.
      *
-     * @param string $query
-     * @param array<int, mixed> $bindings
+     * @param  string  $query
+     * @param  array<int, mixed>  $bindings
      * @return int
      */
     public function affectingStatement($query, $bindings = [])
@@ -242,7 +238,7 @@ class Connection
                 throw new QueryException($e->getMessage());
             }
 
-            if (false === $statement) {
+            if ($statement === false) {
                 throw new QueryException($this->mysqli->error);
             }
 
@@ -257,8 +253,8 @@ class Connection
     /**
      * Run delete query with affected rows
      *
-     * @param string $query
-     * @param array<int, mixed> $bindings
+     * @param  string  $query
+     * @param  array<int, mixed>  $bindings
      * @return int
      */
     public function delete($query, $bindings = [])
@@ -289,7 +285,7 @@ class Connection
     /**
      * Get the connection query logs.
      *
-     * @return array<int, array<string, string>>|null
+     * @return array<int, array<string, array<int, int|string>|float|int|string>>|null
      */
     public function getQueryLog()
     {
@@ -299,9 +295,8 @@ class Connection
     /**
      * Execute a callback within a transaction
      *
-     * @param callable $callback
-     * @param int $flags
-     * @param string|null $name
+     * @param  int  $flags
+     * @param  string|null  $name
      * @return false|mixed
      */
     public function transaction(callable $callback, $flags = 0, $name = null)
@@ -309,26 +304,30 @@ class Connection
         try {
             $result = call_user_func($callback);
             $this->commit($flags, $name);
+
             return $result;
         } catch (Exception $e) {
             $this->rollback($flags, $name);
+
             return false;
         }
     }
 
     /**
-     * @param string $name
-     * @param array<int, string> $arguments
+     * @param  string  $name
+     * @param  array<int, string>  $arguments
      * @return bool
      */
     public function __call($name, $arguments)
     {
-        if (!preg_match('/^(beginTransaction|commit|rollback)$/', $name)) {
+        if (! preg_match('/^(beginTransaction|commit|rollback)$/', $name)) {
             self::throwBadMethodCallException($name);
         }
 
+        // @phpstan-ignore-next-line
         $name = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $name));
 
+        // @phpstan-ignore-next-line
         return call_user_func_array([$this->mysqli, $name], $arguments);
     }
 }

@@ -16,12 +16,12 @@ class DeleteTest extends QueryBuilderFeatureTest
             ->insert([
                 [
                     'meta_key' => 'name1',
-                    'meta_value' => 'value1'
+                    'meta_value' => 'value1',
                 ],
                 [
                     'meta_key' => 'name2',
-                    'meta_value' => 'value2'
-                ]
+                    'meta_value' => 'value2',
+                ],
             ]);
 
         $count = $this->getBuilder('postmeta')->where('meta_key', 'name1')->delete();
@@ -40,12 +40,12 @@ class DeleteTest extends QueryBuilderFeatureTest
             ->insert([
                 [
                     'meta_key' => 'name1',
-                    'meta_value' => 'value1'
+                    'meta_value' => 'value1',
                 ],
                 [
                     'meta_key' => 'name2',
-                    'meta_value' => 'value2'
-                ]
+                    'meta_value' => 'value2',
+                ],
             ]);
 
         $count = $this->getBuilder('postmeta')->delete();

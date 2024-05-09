@@ -4,8 +4,9 @@ namespace Mehedi\WPQueryBuilderTests\Units;
 
 use Mehedi\WPQueryBuilder\Connection;
 use Mehedi\WPQueryBuilder\Exceptions\QueryException;
-use PHPUnit\Framework\TestCase;
 use Mockery as m;
+use PHPUnit\Framework\TestCase;
+
 class TransactionTest extends TestCase
 {
     protected function tearDown(): void
@@ -16,7 +17,7 @@ class TransactionTest extends TestCase
     /**
      * @test
      */
-    function it_should_throw_exception_method_not_found()
+    public function it_should_throw_exception_method_not_found()
     {
         $co = new Connection(m::mock(\mysqli::class));
 
@@ -28,7 +29,7 @@ class TransactionTest extends TestCase
     /**
      * @test
      */
-    function it_can_begin_transaction()
+    public function it_can_begin_transaction()
     {
         $m = m::mock(\mysqli::class);
 
@@ -42,7 +43,7 @@ class TransactionTest extends TestCase
     /**
      * @test
      */
-    function it_can_commit_a_transaction()
+    public function it_can_commit_a_transaction()
     {
         $m = m::mock(\mysqli::class);
 
@@ -56,7 +57,7 @@ class TransactionTest extends TestCase
     /**
      * @test
      */
-    function it_can_rollback_a_transaction()
+    public function it_can_rollback_a_transaction()
     {
         $m = m::mock(\mysqli::class);
 
@@ -70,7 +71,7 @@ class TransactionTest extends TestCase
     /**
      * @test
      */
-    function it_will_commit_the_transaction_if_no_exception_was_thrown_in_callback()
+    public function it_will_commit_the_transaction_if_no_exception_was_thrown_in_callback()
     {
         $m = m::mock(\mysqli::class);
 
@@ -79,7 +80,7 @@ class TransactionTest extends TestCase
         $co = new Connection($m);
 
         $result = $co->transaction(function () {
-           return 3;
+            return 3;
         });
 
         $this->assertEquals(3, $result);
@@ -88,7 +89,7 @@ class TransactionTest extends TestCase
     /**
      * @test
      */
-    function it_will_rollback_the_transaction_if_exception_was_thrown_in_callback()
+    public function it_will_rollback_the_transaction_if_exception_was_thrown_in_callback()
     {
         $m = m::mock(\mysqli::class);
 

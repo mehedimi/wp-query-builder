@@ -9,9 +9,9 @@ trait ForwardsCalls
     /**
      * Forward a method call to the given object.
      *
-     * @param mixed $object
-     * @param string $method
-     * @param array<int, mixed> $parameters
+     * @param  mixed  $object
+     * @param  string  $method
+     * @param  array<int, mixed>  $parameters
      * @return mixed
      *
      * @throws BadMethodCallException
@@ -23,7 +23,7 @@ trait ForwardsCalls
         } catch (BadMethodCallException $e) {
             $pattern = '~^Call to undefined method (?P<class>[^:]+)::(?P<method>[^\(]+)\(\)$~';
 
-            if (!preg_match($pattern, $e->getMessage(), $matches)) {
+            if (! preg_match($pattern, $e->getMessage(), $matches)) {
                 throw $e;
             }
 
@@ -39,7 +39,7 @@ trait ForwardsCalls
     /**
      * Throw a bad method call exception for the given method.
      *
-     * @param string $method
+     * @param  string  $method
      * @return void
      *
      * @throws BadMethodCallException

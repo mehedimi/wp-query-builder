@@ -16,13 +16,13 @@ class UpdateTest extends QueryBuilderFeatureTest
         $this->getBuilder()->from('postmeta')
             ->insert([
                 'meta_key' => 'name',
-                'meta_value' => 'value'
+                'meta_value' => 'value',
             ]);
 
         $result = $this->getBuilder('postmeta')
             ->where('meta_key', 'name')
             ->update([
-                'meta_value' => 'value_update'
+                'meta_value' => 'value_update',
             ]);
 
         $this->assertSame(1, $result);
@@ -44,18 +44,18 @@ class UpdateTest extends QueryBuilderFeatureTest
             ->insert([
                 [
                     'meta_key' => 'name1',
-                    'meta_value' => 'value1'
+                    'meta_value' => 'value1',
                 ],
                 [
                     'meta_key' => 'name2',
-                    'meta_value' => 'value2'
-                ]
+                    'meta_value' => 'value2',
+                ],
             ]);
 
         $result = $this->getBuilder('postmeta')
             ->where('meta_key', 'name1')
             ->update([
-                'meta_value' => 'value_update_1'
+                'meta_value' => 'value_update_1',
             ]);
 
         $this->assertSame(1, $result);
@@ -80,17 +80,17 @@ class UpdateTest extends QueryBuilderFeatureTest
             ->insert([
                 [
                     'meta_key' => 'name1',
-                    'meta_value' => 'value1'
+                    'meta_value' => 'value1',
                 ],
                 [
                     'meta_key' => 'name2',
-                    'meta_value' => 'value2'
-                ]
+                    'meta_value' => 'value2',
+                ],
             ]);
 
         $result = $this->getBuilder('postmeta')
             ->update([
-                'meta_value' => 'value_updated'
+                'meta_value' => 'value_updated',
             ]);
 
         $this->assertSame(2, $result);

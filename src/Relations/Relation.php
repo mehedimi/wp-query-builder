@@ -3,7 +3,6 @@
 namespace Mehedi\WPQueryBuilder\Relations;
 
 use Mehedi\WPQueryBuilder\Concerns\ForwardsCalls;
-use Mehedi\WPQueryBuilder\DB;
 use Mehedi\WPQueryBuilder\Query\Builder;
 
 /**
@@ -28,33 +27,32 @@ abstract class Relation
     protected $builder;
 
     /**
-     * @var array<integer, object>
+     * @var array<int, object>
      */
     protected $items;
 
     /**
      * Constructor of Relation Class
      *
-     * @param string $name
-     * @param Builder|null $builder
+     * @param  string  $name
      */
     public function __construct($name, Builder $builder = null)
     {
         $this->name = $name;
-        $this->builder = $builder ?: new Builder(DB::getConnection());
+        $this->builder = $builder ?: new Builder($this->builder->connection);
     }
 
     /**
      * Load related items
      *
-     * @return array<integer, object>
+     * @return array<int, object>
      */
     public function load()
     {
         $loadedItems = $this->loadedItemsDictionary();
 
         return array_map(function ($item) use (&$loadedItems) {
-            $item->{$this->name} = $this->getItemFromDictionary($loadedItems, $item);
+            $item->{$this->name} = $this->getItemFromDictionary($loadedItems, $item); // @phpstan-ignore-line
 
             return $item;
         }, $this->items);
@@ -63,15 +61,15 @@ abstract class Relation
     /**
      * Loaded items with under its foreign key
      *
-     * @return array<string|integer, object | array<integer, object>>
+     * @return array<string|int, object | array<int, object>>
      */
     abstract protected function loadedItemsDictionary();
 
     /**
      * Get mapped value from dictionary
      *
-     * @param array<string, object | array<integer, object>> $loadedItems
-     * @param object $item
+     * @param  array<string, object | array<int, object>>  $loadedItems
+     * @param  object  $item
      * @return object|null | array<int, object>
      */
     abstract protected function getItemFromDictionary($loadedItems, $item);
@@ -79,7 +77,7 @@ abstract class Relation
     /**
      * Set items of record
      *
-     * @param array<integer, object> $items
+     * @param  array<int, object>  $items
      * @return $this
      */
     public function setItems(array $items)
@@ -92,8 +90,8 @@ abstract class Relation
     /**
      * Handle dynamic methods call of query builder
      *
-     * @param string $name
-     * @param array<integer, string> $arguments
+     * @param  string  $name
+     * @param  array<int, string>  $arguments
      * @return Builder
      */
     public function __call($name, $arguments)
@@ -108,7 +106,7 @@ abstract class Relation
     /**
      * Get loaded items
      *
-     * @return array<integer, object>
+     * @return array<int, object>
      */
     abstract protected function getLoadedItems();
 }

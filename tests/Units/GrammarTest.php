@@ -147,21 +147,21 @@ class GrammarTest extends TestCase
             ->from('posts')
             ->where('is_admin', 'yes')
             ->toSQL();
-        $this->assertEquals("select * from wp_posts where is_admin = ?", $sql);
+        $this->assertEquals('select * from wp_posts where is_admin = ?', $sql);
 
         $sql = $this->getBuilder()
             ->from('posts')
             ->where('is_admin', 1)
             ->toSQL();
 
-        $this->assertEquals("select * from wp_posts where is_admin = ?", $sql);
+        $this->assertEquals('select * from wp_posts where is_admin = ?', $sql);
 
         $sql = $this->getBuilder()
             ->from('posts')
             ->where('amount', '>', 1.5)
             ->toSQL();
 
-        $this->assertEquals("select * from wp_posts where amount > ?", $sql);
+        $this->assertEquals('select * from wp_posts where amount > ?', $sql);
     }
 
     /**
@@ -176,7 +176,7 @@ class GrammarTest extends TestCase
             ->where('amount', '>', 4.3, 'or')
             ->toSQL();
 
-        $this->assertEquals("select * from wp_posts where is_admin = ? and is_active = ? or amount > ?", $sql);
+        $this->assertEquals('select * from wp_posts where is_admin = ? and is_active = ? or amount > ?', $sql);
     }
 
     /**
@@ -190,7 +190,7 @@ class GrammarTest extends TestCase
             ->orWhere('is_editor', 'no')
             ->toSQL();
 
-        $this->assertEquals("select * from wp_posts where is_admin = ? or is_editor = ?", $sql);
+        $this->assertEquals('select * from wp_posts where is_admin = ? or is_editor = ?', $sql);
     }
 
     /**
@@ -203,7 +203,7 @@ class GrammarTest extends TestCase
             ->whereIn('is_admin', ['yes', 3, 8.4])
             ->toSQL();
 
-        $this->assertEquals("select * from wp_posts where is_admin in (?, ?, ?)", $sql);
+        $this->assertEquals('select * from wp_posts where is_admin in (?, ?, ?)', $sql);
     }
 
     /**
@@ -216,7 +216,7 @@ class GrammarTest extends TestCase
             ->whereNotIn('is_admin', ['yes', 3, 8.4])
             ->toSQL();
 
-        $this->assertEquals("select * from wp_posts where is_admin not in (?, ?, ?)", $sql);
+        $this->assertEquals('select * from wp_posts where is_admin not in (?, ?, ?)', $sql);
     }
 
     /**
@@ -230,7 +230,7 @@ class GrammarTest extends TestCase
             ->whereNull('l_name', 'or')
             ->toSQL();
 
-        $this->assertEquals("select * from wp_posts where name is null or l_name is null", $sql);
+        $this->assertEquals('select * from wp_posts where name is null or l_name is null', $sql);
     }
 
     /**
@@ -244,7 +244,7 @@ class GrammarTest extends TestCase
             ->whereNotNull(['l_name', 'f_name'])
             ->toSQL();
 
-        $this->assertEquals("select * from wp_posts where name is not null and l_name is not null and f_name is not null", $sql);
+        $this->assertEquals('select * from wp_posts where name is not null and l_name is not null and f_name is not null', $sql);
     }
 
     /**
@@ -258,7 +258,7 @@ class GrammarTest extends TestCase
             ->whereBetween('item', [3, 9], 'or', true)
             ->toSQL();
 
-        $this->assertEquals("select * from wp_posts where amount between ? and ? or item not between ? and ?", $sql);
+        $this->assertEquals('select * from wp_posts where amount between ? and ? or item not between ? and ?', $sql);
     }
 
     /**
@@ -272,7 +272,6 @@ class GrammarTest extends TestCase
         $p->shouldReceive('execute');
         $p->shouldReceive('fetch_object');
         $p->shouldReceive('get_result')->andReturn($p);
-
 
         $m->shouldReceive('prepare')
             ->with('insert into wp_posts default values')
@@ -294,7 +293,7 @@ class GrammarTest extends TestCase
             ->insert([
                 'name' => 'foo',
                 'id' => 3,
-                'add' => null
+                'add' => null,
             ]);
 
         $m->shouldReceive('prepare')
@@ -305,12 +304,12 @@ class GrammarTest extends TestCase
             ->insert([
                 [
                     'name' => 'foo',
-                    'id' => 3
+                    'id' => 3,
                 ],
                 [
                     'name' => 'bar',
-                    'id' => 5
-                ]
+                    'id' => 5,
+                ],
             ]);
 
         $this->assertTrue(true);
@@ -447,7 +446,7 @@ class GrammarTest extends TestCase
     {
         Grammar::getInstance()->setTablePrefix('wp_');
 
-        $b = new Builder(null, Grammar::getInstance());
+        $b = new Builder(new Connection(m::mock(mysqli::class)), Grammar::getInstance());
 
         $b->from('posts');
 
@@ -461,7 +460,7 @@ class GrammarTest extends TestCase
     {
         Grammar::getInstance()->setTablePrefix('wp_');
 
-        $b = new Builder(null, Grammar::getInstance());
+        $b = new Builder(new Connection(m::mock(mysqli::class)), Grammar::getInstance());
 
         $b->from('posts');
 

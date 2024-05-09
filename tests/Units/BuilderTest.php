@@ -299,7 +299,7 @@ class BuilderTest extends TestCase
         $this->assertEquals(
             [
                 ['type' => 'Null', 'column' => 'name', 'boolean' => 'and'],
-                ['type' => 'Null', 'column' => 'address', 'boolean' => 'and']
+                ['type' => 'Null', 'column' => 'address', 'boolean' => 'and'],
             ],
             $b->wheres
         );
@@ -321,7 +321,7 @@ class BuilderTest extends TestCase
         $this->assertEquals(
             [
                 ['type' => 'NotNull', 'column' => 'name', 'boolean' => 'and'],
-                ['type' => 'NotNull', 'column' => 'address', 'boolean' => 'and']
+                ['type' => 'NotNull', 'column' => 'address', 'boolean' => 'and'],
             ],
             $b->wheres
         );

@@ -24,14 +24,12 @@ class WithOne extends WithOneOrMany
     /**
      * Get mapped value from dictionary
      *
-     * @param $loadedItems
-     * @param $item
      * @return object|null
      */
     protected function getItemFromDictionary($loadedItems, $item)
     {
         if (array_key_exists($item->{$this->localKey}, $loadedItems)) {
-            return $loadedItems[$item->{$this->localKey}];
+            return $loadedItems[$item->{$this->localKey}]; // @phpstan-ignore-line
         }
 
         return null;

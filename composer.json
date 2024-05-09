@@ -2,6 +2,11 @@
   "name": "mehedimi/wp-query-builder",
   "description": "A database query builder for WordPress",
   "license": "MIT",
+  "config": {
+    "platform": {
+      "php": "5.6"
+    }
+  },
   "autoload": {
     "psr-4": {
       "Mehedi\\WPQueryBuilder\\": "src/"
@@ -27,7 +32,8 @@
     "vlucas/phpdotenv": "^5.4",
     "fakerphp/faker": "^1.20",
     "phpstan/phpstan": "^1.9",
-    "phpstan/phpstan-mockery": "^1.1"
+    "phpstan/phpstan-mockery": "^1.1",
+    "laravel/pint": "^1.15"
   },
   "require": {
     "ext-mysqli": "*",
@@ -38,6 +44,7 @@
     "test:units": "phpunit --filter=Units --testdox",
     "test:features": "RUN_FEATURE_TEST=on phpunit --filter=Features --testdox",
     "check": "vendor/bin/phpstan analyse -c phpstan.neon",
-    "pre-commit": "composer check && composer test"
+    "pre-commit": "composer fmt && composer check && composer test",
+    "fmt": "./vendor/bin/pint"
   }
 }

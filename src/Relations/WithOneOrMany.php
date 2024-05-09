@@ -21,10 +21,9 @@ abstract class WithOneOrMany extends Relation
     protected $localKey;
 
     /**
-     * @param string $name
-     * @param string $foreignKey
-     * @param string $localKey
-     * @param Builder $builder
+     * @param  string  $name
+     * @param  string  $foreignKey
+     * @param  string  $localKey
      */
     public function __construct($name, $foreignKey, $localKey, Builder $builder)
     {
@@ -37,7 +36,7 @@ abstract class WithOneOrMany extends Relation
     /**
      * Get loaded items
      *
-     * @return array<integer, object>
+     * @return array<int, object>
      */
     protected function getLoadedItems()
     {

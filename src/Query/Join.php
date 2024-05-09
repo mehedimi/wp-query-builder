@@ -2,6 +2,8 @@
 
 namespace Mehedi\WPQueryBuilder\Query;
 
+use Mehedi\WPQueryBuilder\Connection;
+
 class Join extends Builder
 {
     /**
@@ -21,24 +23,23 @@ class Join extends Builder
     /**
      * Create a new join clause instance.
      *
-     * @param string $table
-     * @param string $type
-     * @param Grammar|null $grammar
+     * @param  string  $table
+     * @param  string  $type
      */
-    public function __construct($table, $type, Grammar $grammar = null)
+    public function __construct($table, $type, Connection $connection, Grammar $grammar = null)
     {
         $this->table = $table;
         $this->type = $type;
 
-        parent::__construct($this->connection, $grammar);
+        parent::__construct($connection, $grammar);
     }
 
     /**
      * Add an "or on" clause to the join.
      *
-     * @param string $first
-     * @param string|null $operator
-     * @param string|null $second
+     * @param  string  $first
+     * @param  string|null  $operator
+     * @param  string|null  $second
      * @return Join
      */
     public function orOn($first, $operator = null, $second = null)
@@ -49,10 +50,10 @@ class Join extends Builder
     /**
      * Add an "on" clause to the join.
      *
-     * @param string $first
-     * @param string|null $operator
-     * @param string|null $second
-     * @param string $boolean
+     * @param  string  $first
+     * @param  string|null  $operator
+     * @param  string|null  $second
+     * @param  string  $boolean
      * @return Join
      */
     public function on($first, $operator = null, $second = null, $boolean = 'and')

@@ -121,21 +121,19 @@ class Builder
      *
      * @var Grammar
      */
-    protected $grammar;
+    public $grammar;
 
     /**
      * Connection instance
      *
      * @var Connection
      */
-    protected $connection;
+    public $connection;
 
     /**
      * Create a new query builder instance.
-     *
-     * @param Grammar|null $grammar
      */
-    public function __construct(Connection $connection, Grammar $grammar = null)
+    public function __construct(Connection $connection, ?Grammar $grammar = null)
     {
         $this->connection = $connection;
         $this->grammar = $grammar ?: Grammar::getInstance();
@@ -144,7 +142,7 @@ class Builder
     /**
      * Set the table which the query is targeting.
      *
-     * @param string $table
+     * @param  string  $table
      * @return $this
      */
     public function from($table)
@@ -157,7 +155,7 @@ class Builder
     /**
      * Use distinct query
      *
-     * @param bool $column
+     * @param  bool  $column
      * @return $this
      */
     public function distinct($column = true)
@@ -170,7 +168,7 @@ class Builder
     /**
      * Retrieve the sum of the values of a given column.
      *
-     * @param string $column
+     * @param  string  $column
      * @return float|int
      */
     public function sum($column)
@@ -181,8 +179,8 @@ class Builder
     /**
      * Execute an aggregate function on the database.
      *
-     * @param string $function
-     * @param string $column
+     * @param  string  $function
+     * @param  string  $column
      * @return float|int
      */
     public function aggregate($function, $column)
@@ -191,7 +189,7 @@ class Builder
 
         $data = $this->get();
 
-        if (empty($data) || !isset($data[0]->aggregate)) {
+        if (empty($data) || ! isset($data[0]->aggregate)) {
             return 0;
         }
 
@@ -213,7 +211,7 @@ class Builder
 
         $results = $this->connection->select($this->toSQL(), $bindings);
 
-        if (!empty($this->with)) {
+        if (! empty($this->with)) {
             foreach ($this->with as $relation) {
                 /** @var Relation $relation */
                 $results = $relation->setItems($results)->load();
@@ -238,7 +236,7 @@ class Builder
     /**
      * Select table columns
      *
-     * @param string|array<int, string> $columns
+     * @param  string|array<int, string>  $columns
      * @return $this
      */
     public function select($columns)
@@ -261,18 +259,18 @@ class Builder
     /**
      * Retrieve the "count" result of the query.
      *
-     * @param string $columns
+     * @param  string  $columns
      * @return int
      */
     public function count($columns = '*')
     {
-        return (int)$this->aggregate(__FUNCTION__, $columns);
+        return (int) $this->aggregate(__FUNCTION__, $columns);
     }
 
     /**
      * Retrieve the average of the values of a given column.
      *
-     * @param string $column
+     * @param  string  $column
      * @return float|int
      */
     public function avg($column)
@@ -283,7 +281,7 @@ class Builder
     /**
      * Retrieve the minimum value of a given column.
      *
-     * @param string $column
+     * @param  string  $column
      * @return float|int
      */
     public function min($column)
@@ -294,7 +292,7 @@ class Builder
     /**
      * Retrieve the maximum value of a given column.
      *
-     * @param string $column
+     * @param  string  $column
      * @return float|int
      */
     public function max($column)
@@ -305,7 +303,7 @@ class Builder
     /**
      * Alias to set the "offset" value of the query.
      *
-     * @param int $value
+     * @param  int  $value
      * @return $this
      */
     public function skip($value)
@@ -316,12 +314,12 @@ class Builder
     /**
      * Set the "offset" value of the query.
      *
-     * @param int|null $value
+     * @param  int|null  $value
      * @return $this
      */
     public function offset($value)
     {
-        $this->offset = !is_null($value) ? (int)$value : null;
+        $this->offset = ! is_null($value) ? (int) $value : null;
 
         return $this;
     }
@@ -343,12 +341,12 @@ class Builder
     /**
      * Set the "limit" value of the query.
      *
-     * @param int|null $value
+     * @param  int|null  $value
      * @return $this
      */
     public function limit($value)
     {
-        $this->limit = !is_null($value) ? (int)$value : null;
+        $this->limit = ! is_null($value) ? (int) $value : null;
 
         return $this;
     }
@@ -356,14 +354,14 @@ class Builder
     /**
      * Add an "or where" clause to the query.
      *
-     * @param string $column
-     * @param mixed $operator
-     * @param mixed $value
+     * @param  string  $column
+     * @param  mixed  $operator
+     * @param  mixed  $value
      * @return $this
      */
     public function orWhere($column, $operator = null, $value = null)
     {
-        list($value, $operator) = $this->prepareValueAndOperator(
+        [$value, $operator] = $this->prepareValueAndOperator(
             $value,
             $operator,
             func_num_args() === 2
@@ -375,9 +373,9 @@ class Builder
     /**
      * Prepare the value and operator for a where clause.
      *
-     * @param string|numeric $value
-     * @param string $operator
-     * @param bool $useDefault
+     * @param  string|numeric  $value
+     * @param  string  $operator
+     * @param  bool  $useDefault
      * @return array<int, mixed>
      *
      * @throws InvalidArgumentException
@@ -398,23 +396,23 @@ class Builder
      *
      * Prevents using Null values with invalid operators.
      *
-     * @param string $operator
-     * @param mixed $value
+     * @param  string  $operator
+     * @param  mixed  $value
      * @return bool
      */
     protected function invalidOperatorAndValue($operator, $value)
     {
         return is_null($value) && in_array($operator, $this->operators) &&
-            !in_array($operator, ['=', '<>', '!=']);
+            ! in_array($operator, ['=', '<>', '!=']);
     }
 
     /**
      * Add a basic where clause to the query.
      *
-     * @param string $column
-     * @param string|null $operator
-     * @param string|null|float|int $value
-     * @param string $boolean
+     * @param  string  $column
+     * @param  string|null  $operator
+     * @param  string|null|float|int  $value
+     * @param  string  $boolean
      * @return $this
      */
     public function where($column, $operator = null, $value = null, $boolean = 'and')
@@ -424,7 +422,7 @@ class Builder
         // Here we will make some assumptions about the operator. If only 2 values are
         // passed to the method, we will assume that the operator is an equals sign
         // and keep going. Otherwise, we'll require the operator to be passed in.
-        list($value, $operator) = $this->prepareValueAndOperator(
+        [$value, $operator] = $this->prepareValueAndOperator(
             $value, // @phpstan-ignore-line
             $operator, // @phpstan-ignore-line
             func_num_args() === 2
@@ -447,16 +445,16 @@ class Builder
     /**
      * Add a "where null" clause to the query.
      *
-     * @param string|array<int, string> $columns
-     * @param string $boolean
-     * @param bool $not
+     * @param  string|array<int, string>  $columns
+     * @param  string  $boolean
+     * @param  bool  $not
      * @return $this
      */
     public function whereNull($columns, $boolean = 'and', $not = false)
     {
         $type = $not ? 'NotNull' : 'Null';
 
-        foreach ((array)$columns as $column) {
+        foreach ((array) $columns as $column) {
             $this->wheres[] = compact('type', 'column', 'boolean');
         }
 
@@ -466,15 +464,15 @@ class Builder
     /**
      * Add a binding to the query.
      *
-     * @param mixed $value
-     * @param string $type
+     * @param  mixed  $value
+     * @param  string  $type
      * @return $this
      *
      * @throws InvalidArgumentException
      */
     protected function addBinding($value, $type = 'where')
     {
-        if (!array_key_exists($type, $this->bindings)) {
+        if (! array_key_exists($type, $this->bindings)) {
             throw new InvalidArgumentException("Invalid binding type: $type.");
         }
         if (is_array($value)) {
@@ -489,9 +487,9 @@ class Builder
     /**
      * Add a "where not in" clause to the query.
      *
-     * @param string $column
-     * @param mixed $values
-     * @param string $boolean
+     * @param  string  $column
+     * @param  mixed  $values
+     * @param  string  $boolean
      * @return $this
      */
     public function whereNotIn($column, $values, $boolean = 'and')
@@ -502,10 +500,10 @@ class Builder
     /**
      * Add a "where in" clause to the query.
      *
-     * @param string $column
-     * @param mixed $values
-     * @param string $boolean
-     * @param bool $not
+     * @param  string  $column
+     * @param  mixed  $values
+     * @param  string  $boolean
+     * @param  bool  $not
      * @return $this
      */
     public function whereIn($column, $values, $boolean = 'and', $not = false)
@@ -524,8 +522,8 @@ class Builder
     /**
      * Add a "where not null" clause to the query.
      *
-     * @param string|array<int, string> $columns
-     * @param string $boolean
+     * @param  string|array<int, string>  $columns
+     * @param  string  $boolean
      * @return $this
      */
     public function whereNotNull($columns, $boolean = 'and')
@@ -536,9 +534,9 @@ class Builder
     /**
      * Add a where not between statement to the query.
      *
-     * @param string $column
-     * @param array<int|string, string> $values
-     * @param string $boolean
+     * @param  string  $column
+     * @param  array<int|string, string>  $values
+     * @param  string  $boolean
      * @return $this
      */
     public function whereNotBetween($column, array $values, $boolean = 'and')
@@ -549,10 +547,10 @@ class Builder
     /**
      * Add a where between statement to the query.
      *
-     * @param string $column
-     * @param array<string|int, int|float|string> $values
-     * @param string $boolean
-     * @param bool $not
+     * @param  string  $column
+     * @param  array<string|int, int|float|string>  $values
+     * @param  string  $boolean
+     * @param  bool  $not
      * @return $this
      */
     public function whereBetween($column, $values, $boolean = 'and', $not = false)
@@ -573,13 +571,13 @@ class Builder
     /**
      * Insert new records into the database.
      *
-     * @param array<int|string, mixed> $values
-     * @param bool $ignore
+     * @param  array<int|string, mixed>  $values
+     * @param  bool  $ignore
      * @return bool|int
      */
     public function insert(array $values, $ignore = false)
     {
-        if (!empty($values) && !is_array(reset($values))) {
+        if (! empty($values) && ! is_array(reset($values))) {
             $values = [$values];
         }
 
@@ -603,7 +601,7 @@ class Builder
     /**
      * Update records in the database.
      *
-     * @param array<string, mixed> $values
+     * @param  array<string, mixed>  $values
      * @return int
      */
     public function update(array $values)
@@ -632,8 +630,8 @@ class Builder
     /**
      * Add an "order by" clause to the query.
      *
-     * @param string $column
-     * @param string $direction
+     * @param  string  $column
+     * @param  string  $direction
      * @return $this
      */
     public function orderBy($column, $direction = 'asc')
@@ -646,17 +644,17 @@ class Builder
     /**
      * Add a "where" clause comparing two columns to the query.
      *
-     * @param string $first
-     * @param string|null $operator
-     * @param string|null $second
-     * @param string $boolean
+     * @param  string  $first
+     * @param  string|null  $operator
+     * @param  string|null  $second
+     * @param  string  $boolean
      * @return $this
      */
     public function whereColumn($first, $operator = null, $second = null, $boolean = 'and')
     {
         $type = 'Column';
 
-        list($second, $operator) = $this->prepareValueAndOperator(
+        [$second, $operator] = $this->prepareValueAndOperator(
             $second, // @phpstan-ignore-line
             $operator, // @phpstan-ignore-line
             func_num_args() === 2
@@ -670,10 +668,10 @@ class Builder
     /**
      * Add a left join clause to the query
      *
-     * @param string $table
-     * @param string|null $first
-     * @param string|null $operator
-     * @param string|null $second
+     * @param  string  $table
+     * @param  string|null  $first
+     * @param  string|null  $operator
+     * @param  string|null  $second
      * @return $this
      */
     public function leftJoin($table, $first = null, $operator = null, $second = null)
@@ -684,11 +682,11 @@ class Builder
     /**
      * Add a join clause to the query.
      *
-     * @param string $table
-     * @param string|null|Closure $first
-     * @param string|null $operator
-     * @param string|null $second
-     * @param string $type
+     * @param  string  $table
+     * @param  string|null|Closure  $first
+     * @param  string|null  $operator
+     * @param  string|null  $second
+     * @param  string  $type
      * @return $this
      */
     public function join($table, $first = null, $operator = null, $second = null, $type = 'inner')
@@ -697,7 +695,7 @@ class Builder
 
         if ($first instanceof Closure) {
             $first($join);
-        } else if (!is_null($first)) {
+        } elseif (! is_null($first)) {
             $join->on($first, $operator, $second);
         }
 
@@ -711,10 +709,10 @@ class Builder
     /**
      * Add a right join clause to the query
      *
-     * @param string $table
-     * @param string|null|Closure $first
-     * @param string|null $operator
-     * @param string|null $second
+     * @param  string  $table
+     * @param  string|null|Closure  $first
+     * @param  string|null  $operator
+     * @param  string|null  $second
      * @return $this
      */
     public function rightJoin($table, $first = null, $operator = null, $second = null)
@@ -725,7 +723,6 @@ class Builder
     /**
      * Apply a mixin to builder class
      *
-     * @param Pluggable $pluggable
      * @return $this
      */
     public function plugin(Pluggable $pluggable)
@@ -738,8 +735,8 @@ class Builder
     /**
      * Add a `group by` clause to query
      *
-     * @param string $column
-     * @param string|null $direction
+     * @param  string  $column
+     * @param  string|null  $direction
      * @return Builder
      */
     public function groupBy($column, $direction = null)
@@ -752,15 +749,14 @@ class Builder
     /**
      * Add a nested where statement to the query.
      *
-     * @param Closure $callback
-     * @param string $boolean
+     * @param  string  $boolean
      * @return $this
      */
     public function whereNested(Closure $callback, $boolean = 'and')
     {
         $callback($query = $this->newQuery());
 
-        if (!empty($query->wheres)) {
+        if (! empty($query->wheres)) {
             $type = 'Nested';
 
             $this->wheres[] = compact('type', 'query', 'boolean');
@@ -798,10 +794,9 @@ class Builder
     /**
      * Add `withOne` relation
      *
-     * @param string $name
-     * @param callable $callback
-     * @param string $foreignKey
-     * @param string $localKey
+     * @param  string  $name
+     * @param  string  $foreignKey
+     * @param  string  $localKey
      * @return Builder
      */
     public function withOne($name, callable $callback, $foreignKey, $localKey = 'ID')
@@ -816,10 +811,9 @@ class Builder
     /**
      * Add `withMany` relation
      *
-     * @param string $name
-     * @param callable $callback
-     * @param string $foreignKey
-     * @param string $localKey
+     * @param  string  $name
+     * @param  string  $foreignKey
+     * @param  string  $localKey
      * @return $this
      */
     public function withMany($name, callable $callback, $foreignKey, $localKey = 'ID')
@@ -834,13 +828,11 @@ class Builder
     /**
      * Add relation to query
      *
-     * @param Relation $relation
-     * @param callable|null $callback
      * @return $this
      */
-    public function withRelation(Relation $relation, callable $callback = null)
+    public function withRelation(Relation $relation, ?callable $callback = null)
     {
-        if (!is_null($callback)) {
+        if (! is_null($callback)) {
             call_user_func($callback, $relation);
         }
 

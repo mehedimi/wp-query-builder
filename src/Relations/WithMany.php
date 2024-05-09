@@ -7,7 +7,7 @@ class WithMany extends WithOneOrMany
     /**
      * Loaded items with under its foreign key
      *
-     * @return array<string, array<integer, object>>
+     * @return array<string, array<int, object>>
      */
     protected function loadedItemsDictionary()
     {
@@ -18,15 +18,15 @@ class WithMany extends WithOneOrMany
             $items[$loadedItem->{$this->foreignKey}][] = $loadedItem;
         }
 
-        return $items;
+        return $items; // @phpstan-ignore-line
     }
 
     /**
      * Get mapped values from dictionary
      *
-     * @param array<string|int, array<integer, object>> $loadedItems
-     * @param object $item
-     * @return array<integer, object>
+     * @param  array<string|int, array<int, object>>  $loadedItems
+     * @param  object  $item
+     * @return array<int, object>
      */
     protected function getItemFromDictionary($loadedItems, $item)
     {

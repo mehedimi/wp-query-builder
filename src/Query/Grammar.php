@@ -52,17 +52,16 @@ class Grammar
     /**
      * Compile a select query into SQL.
      *
-     * @param Builder $builder
      * @return string
      */
     public function compileSelectComponents(Builder $builder)
     {
-        $sql = ['select' . ($builder->distinct ? ' distinct' : '')];
+        $sql = ['select'.($builder->distinct ? ' distinct' : '')];
 
         foreach ($this->selectComponents as $component) {
             if (isset($builder->{$component})) {
                 $sql[$component] = call_user_func(
-                    [$this, 'compile' . ucfirst($component)],
+                    [$this, 'compile'.ucfirst($component)], // @phpstan-ignore-line
                     $builder,
                     $builder->{$component}
                 );
@@ -75,9 +74,8 @@ class Grammar
     /**
      * Compile an insert statement into SQL.
      *
-     * @param Builder $builder
-     * @param array<string|int, mixed> $values
-     * @param bool $ignore
+     * @param  array<string|int, mixed>  $values
+     * @param  bool  $ignore
      * @return string
      */
     public function compileInsert(Builder $builder, array $values, $ignore)
@@ -88,24 +86,24 @@ class Grammar
             return "insert into $table default values";
         }
 
-        $columns = $this->columnize(array_keys(reset($values)));
+        $columns = $this->columnize(array_keys(reset($values))); // @phpstan-ignore-line
 
         $placeholderValues = implode(', ', array_map(function ($value) {
-            return '(' . implode(', ', array_map([$this, 'getValuePlaceholder'], $value)) . ')';
+            return '('.implode(', ', array_map([$this, 'getValuePlaceholder'], $value)).')';
         }, $values));
 
-        return ($ignore ? 'insert ignore' : 'insert') . " into $table($columns) values $placeholderValues";
+        return ($ignore ? 'insert ignore' : 'insert')." into $table($columns) values $placeholderValues";
     }
 
     /**
      * Get table name with prefix
      *
-     * @param string $table
+     * @param  string  $table
      * @return string
      */
     protected function tableWithPrefix($table)
     {
-        return $this->getTablePrefix() . $table;
+        return $this->getTablePrefix().$table;
     }
 
     /**
@@ -121,7 +119,7 @@ class Grammar
     /**
      * Set the grammar's table prefix.
      *
-     * @param string $prefix
+     * @param  string  $prefix
      * @return $this
      */
     public function setTablePrefix($prefix)
@@ -134,7 +132,7 @@ class Grammar
     /**
      * Convert an array of column names into a delimited string.
      *
-     * @param array<int, string> $columns
+     * @param  array<int, string>  $columns
      * @return string
      */
     public function columnize(array $columns)
@@ -145,8 +143,7 @@ class Grammar
     /**
      * Compile an update statement into SQL.
      *
-     * @param Builder $builder
-     * @param array<string, mixed> $values
+     * @param  array<string, mixed>  $values
      * @return string
      */
     public function compileUpdate(Builder $builder, array $values)
@@ -160,7 +157,7 @@ class Grammar
     /**
      * Compile the columns for an update statement.
      *
-     * @param array<string, mixed> $values
+     * @param  array<string, mixed>  $values
      * @return string
      */
     protected function compileUpdateColumns($values)
@@ -173,7 +170,7 @@ class Grammar
     /**
      * Get value placeholder based on value data type
      *
-     * @param mixed|null $value
+     * @param  mixed|null  $value
      * @return string
      */
     protected function getValuePlaceholder($value)
@@ -188,13 +185,12 @@ class Grammar
     /**
      * Compile the "where" portions of the query.
      *
-     * @param Builder $builder
-     * @return string|null
+     * @return string
      */
     public function compileWheres(Builder $builder)
     {
         if (empty($builder->wheres)) {
-            return null;
+            return '';
         }
 
         return $this->concatenateWhereClauses(
@@ -206,45 +202,43 @@ class Grammar
     /**
      * Format the where clause statements into one string.
      *
-     * @param Builder $builder
-     * @param array<int, string> $whereSegment
+     * @param  Builder  $builder
+     * @param  array<int, string>  $whereSegment
      * @return string
      */
     protected function concatenateWhereClauses($builder, $whereSegment)
     {
-        return ($builder instanceof Join ? 'on' : 'where') . ' ' . $this->removeLeadingBoolean(
-                implode(' ', $whereSegment)
-            );
+        return ($builder instanceof Join ? 'on' : 'where').' '.$this->removeLeadingBoolean(
+            implode(' ', $whereSegment)
+        );
     }
 
     /**
      * Remove the leading boolean from a statement.
      *
-     * @param string $value
+     * @param  string  $value
      * @return string
      */
     protected function removeLeadingBoolean($value)
     {
-        return preg_replace('/and |or /i', '', $value, 1);
+        return preg_replace('/and |or /i', '', $value, 1); // @phpstan-ignore-line
     }
 
     /**
      * Get an array of all the where clauses for the query.
      *
-     * @param Builder $builder
      * @return string[]
      */
     protected function compileWheresToArray(Builder $builder)
     {
         return array_map(function ($where) use ($builder) {
-            return $where['boolean'] . ' ' . call_user_func([$this, 'where' . $where['type']], $builder, $where);
+            return $where['boolean'].' '.call_user_func([$this, 'where'.$where['type']], $builder, $where); // @phpstan-ignore-line
         }, $builder->wheres);
     }
 
     /**
      * Compile a delete statement into SQL.
      *
-     * @param Builder $builder
      * @return string
      */
     public function compileDelete(Builder $builder)
@@ -258,19 +252,17 @@ class Grammar
     /**
      * Compile a truncate table statement into SQL.
      *
-     * @param Builder $builder
      * @return string
      */
     public function compileTruncate(Builder $builder)
     {
-        return 'truncate table ' . $this->tableWithPrefix($builder->from);
+        return 'truncate table '.$this->tableWithPrefix($builder->from);
     }
 
     /**
      * Compile an aggregated select clause.
      *
-     * @param Builder $builder
-     * @param array<int, string> $aggregate
+     * @param  array<int, string>  $aggregate
      * @return string
      */
     protected function compileAggregate(Builder $builder, array $aggregate)
@@ -281,8 +273,7 @@ class Grammar
     /**
      * Compile the "select *" portion of the query.
      *
-     * @param Builder $builder
-     * @param array<int, string>|string $columns
+     * @param  array<int, string>|string  $columns
      * @return bool|string|null
      */
     protected function compileColumns(Builder $builder, $columns)
@@ -301,7 +292,7 @@ class Grammar
     /**
      * Wrap with table prefix
      *
-     * @param array<int, string>|string $columns
+     * @param  array<int, string>|string  $columns
      * @return string
      */
     protected function withPrefixColumns($columns)
@@ -324,62 +315,57 @@ class Grammar
     /**
      * Compile the "from" portion of the query.
      *
-     * @param Builder $builder
-     * @param string $from
+     * @param  string  $from
      * @return string
      */
     protected function compileFrom(Builder $builder, $from)
     {
-        return 'from ' . $this->tableWithPrefix($from);
+        return 'from '.$this->tableWithPrefix($from);
     }
 
     /**
      * Compile the "limit" portions of the query.
      *
-     * @param Builder $builder
-     * @param int $limit
+     * @param  int  $limit
      * @return string
      */
     protected function compileLimit(Builder $builder, $limit)
     {
-        return 'limit ' . $limit;
+        return 'limit '.$limit;
     }
 
     /**
      * Compile the "offset" portions of the query.
      *
-     * @param Builder $builder
-     * @param int $offset
+     * @param  int  $offset
      * @return string
      */
     protected function compileOffset(Builder $builder, $offset)
     {
-        return 'offset ' . $offset;
+        return 'offset '.$offset;
     }
 
     /**
      * Compile basic where clause
      *
-     * @param Builder $builder
-     * @param array<string, mixed> $where
+     * @param  array<string, mixed>  $where
      * @return string
      */
     protected function whereBasic(Builder $builder, $where)
     {
-        return "{$this->withPrefixColumns($where['column'])} {$where['operator']} " . $this->getValuePlaceholder($where['value']);
+        return "{$this->withPrefixColumns($where['column'])} {$where['operator']} ".$this->getValuePlaceholder($where['value']);
     }
 
     /**
      * Compile a "where in" clause.
      *
-     * @param Builder $builder
-     * @param array<string, mixed> $where
+     * @param  array<string, mixed>  $where
      * @return string
      */
     protected function whereIn(Builder $builder, $where)
     {
-        if (!empty($where['values'])) {
-            return $this->withPrefixColumns($where['column']) . ' in (' . implode(', ', array_map([$this, 'getValuePlaceholder'], $where['values'])) . ')';
+        if (! empty($where['values'])) {
+            return $this->withPrefixColumns($where['column']).' in ('.implode(', ', array_map([$this, 'getValuePlaceholder'], $where['values'])).')';
         }
 
         return '0 = 1';
@@ -388,14 +374,13 @@ class Grammar
     /**
      * Compile a "where not in" clause.
      *
-     * @param Builder $builder
-     * @param array<string, mixed> $where
+     * @param  array<string, mixed>  $where
      * @return string
      */
     protected function whereNotIn(Builder $builder, $where)
     {
-        if (!empty($where['values'])) {
-            return $this->withPrefixColumns($where['column']) . ' not in (' . implode(', ', array_map([$this, 'getValuePlaceholder'], $where['values'])) . ')';
+        if (! empty($where['values'])) {
+            return $this->withPrefixColumns($where['column']).' not in ('.implode(', ', array_map([$this, 'getValuePlaceholder'], $where['values'])).')';
         }
 
         return '1 = 1';
@@ -404,60 +389,55 @@ class Grammar
     /**
      * Compile a "where is null" clause.
      *
-     * @param Builder $builder
-     * @param array<string, mixed> $where
+     * @param  array<string, mixed>  $where
      * @return string
      */
     protected function whereNull(Builder $builder, $where)
     {
-        return $this->withPrefixColumns($where['column']) . ' is null';
+        return $this->withPrefixColumns($where['column']).' is null';
     }
 
     /**
      * Compile a "where is not null" clause.
      *
-     * @param Builder $builder
-     * @param array<string, mixed> $where
+     * @param  array<string, mixed>  $where
      * @return string
      */
     protected function whereNotNull(Builder $builder, $where)
     {
-        return $this->withPrefixColumns($where['column']) . ' is not null';
+        return $this->withPrefixColumns($where['column']).' is not null';
     }
 
     /**
      * Compile a "between" where clause.
      *
-     * @param Builder $builder
-     * @param array<string, mixed> $where
+     * @param  array<string, mixed>  $where
      * @return string
      */
     protected function whereBetween(Builder $builder, $where)
     {
         $between = $where['not'] ? 'not between' : 'between';
 
-        return $this->withPrefixColumns($where['column']) . ' ' . $between . ' ' . implode(' and ', array_map([$this, 'getValuePlaceholder'], $where['values']));
+        return $this->withPrefixColumns($where['column']).' '.$between.' '.implode(' and ', array_map([$this, 'getValuePlaceholder'], $where['values']));
     }
 
     /**
      * Compile the "order by" portions of the query.
      *
-     * @param Builder $builder
-     * @param array<int, array<string, mixed>> $orders
+     * @param  array<int, array<string, mixed>>  $orders
      * @return string
      */
     protected function compileOrders(Builder $builder, $orders)
     {
-        return 'order by ' . implode(', ', array_map(function ($order) {
-                return "{$order['column']} {$order['direction']}";
-            }, $orders));
+        return 'order by '.implode(', ', array_map(function ($order) {
+            return "{$order['column']} {$order['direction']}";
+        }, $orders));
     }
 
     /**
      * Compile a where clause comparing two columns.
      *
-     * @param Builder $builder
-     * @param array<string, mixed> $where
+     * @param  array<string, mixed>  $where
      * @return string
      */
     protected function whereColumn(Builder $builder, array $where)
@@ -468,16 +448,15 @@ class Grammar
     /**
      * Compile the "join" portions of the query.
      *
-     * @param Builder $builder
-     * @param array<int, Join> $joins
+     * @param  array<int, Join>  $joins
      * @return string
      */
     protected function compileJoins(Builder $builder, array $joins)
     {
         return implode(' ', array_map(function (Join $join) use ($builder) {
-            $nestedJoins = is_null($join->joins) ? '' : ' ' . $this->compileJoins($builder, $join->joins);
+            $nestedJoins = is_null($join->joins) ? '' : ' '.$this->compileJoins($builder, $join->joins);
 
-            $tableAndNestedJoins = is_null($join->joins) ? $this->tableWithPrefix($join->table) : '(' . $this->tableWithPrefix($join->table) . $nestedJoins . ')';
+            $tableAndNestedJoins = is_null($join->joins) ? $this->tableWithPrefix($join->table) : '('.$this->tableWithPrefix($join->table).$nestedJoins.')';
 
             return "$join->type join $tableAndNestedJoins {$this->compileWheres($join)}";
         }, $joins));
@@ -486,8 +465,7 @@ class Grammar
     /**
      * Compile the "group by" portions of the query.
      *
-     * @param Builder $builder
-     * @param array<int, array<int, string>> $groups
+     * @param  array<int, array<int, string>>  $groups
      * @return string
      */
     protected function compileGroups(Builder $builder, $groups)
@@ -496,14 +474,13 @@ class Grammar
             return implode(' ', array_filter($group));
         }, $groups);
 
-        return 'group by ' . $this->columnize($groups);
+        return 'group by '.$this->columnize($groups);
     }
 
     /**
      * Compile a nested where clause.
      *
-     * @param Builder $builder
-     * @param array<string, mixed> $where
+     * @param  array<string, mixed>  $where
      * @return string
      */
     protected function whereNested(Builder $builder, array $where)
@@ -513,6 +490,6 @@ class Grammar
         // if it is a normal query we need to take the leading "where" of queries.
         $offset = $builder instanceof Join ? 3 : 6;
 
-        return '(' . substr($this->compileWheres($where['query']), $offset) . ')';
+        return '('.substr($this->compileWheres($where['query']), $offset).')';
     }
 }

@@ -30,10 +30,10 @@ class InsertTest extends QueryBuilderFeatureTest
         $this->assertSame(1, count($data));
         $this->assertEquals([
             'meta_key' => 'name',
-            'meta_value' => $name
+            'meta_value' => $name,
         ], [
             'meta_key' => $data[0]->meta_key,
-            'meta_value' => $data[0]->meta_value
+            'meta_value' => $data[0]->meta_value,
         ]);
     }
 
@@ -52,12 +52,12 @@ class InsertTest extends QueryBuilderFeatureTest
         $result = $this->getBuilder()->from('postmeta')->insert([
             [
                 'meta_key' => 'name1',
-                'meta_value' => $name1
+                'meta_value' => $name1,
             ],
             [
                 'meta_key' => 'name2',
-                'meta_value' => $name2
-            ]
+                'meta_value' => $name2,
+            ],
         ]);
 
         $this->assertTrue($result);
@@ -69,21 +69,21 @@ class InsertTest extends QueryBuilderFeatureTest
         $this->assertEquals([
             [
                 'meta_key' => 'name1',
-                'meta_value' => $name1
+                'meta_value' => $name1,
             ],
             [
                 'meta_key' => 'name2',
-                'meta_value' => $name2
-            ]
+                'meta_value' => $name2,
+            ],
         ], [
             [
                 'meta_key' => $data[0]->meta_key,
-                'meta_value' => $data[0]->meta_value
+                'meta_value' => $data[0]->meta_value,
             ],
             [
                 'meta_key' => $data[1]->meta_key,
-                'meta_value' => $data[1]->meta_value
-            ]
+                'meta_value' => $data[1]->meta_value,
+            ],
         ]);
     }
 
@@ -103,13 +103,13 @@ class InsertTest extends QueryBuilderFeatureTest
             [
                 'meta_id' => 1,
                 'meta_key' => 'name1',
-                'meta_value' => $name1
+                'meta_value' => $name1,
             ],
             [
                 'meta_id' => 2,
                 'meta_key' => 'name2',
-                'meta_value' => $name2
-            ]
+                'meta_value' => $name2,
+            ],
         ]);
 
         $this->assertTrue($result);
@@ -118,18 +118,18 @@ class InsertTest extends QueryBuilderFeatureTest
             [
                 'meta_id' => 1,
                 'meta_key' => 'name1',
-                'meta_value' => $name1
+                'meta_value' => $name1,
             ],
             [
                 'meta_id' => 2,
                 'meta_key' => 'name2',
-                'meta_value' => $name2
+                'meta_value' => $name2,
             ],
             [
                 'meta_id' => 3,
                 'meta_key' => 'name3',
-                'meta_value' => $name2
-            ]
+                'meta_value' => $name2,
+            ],
         ], true);
 
         $this->assertSame(1, $result);

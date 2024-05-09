@@ -36,37 +36,37 @@ class WithOneTest extends TestCase
     public function it_can_handle_with_one_query()
     {
         $posts = [
-            (object)[
+            (object) [
                 'ID' => 1,
-                'name' => 'some'
+                'name' => 'some',
             ],
-            (object)[
+            (object) [
                 'ID' => 2,
-                'name' => 'some'
-            ]
+                'name' => 'some',
+            ],
         ];
 
         $loadedItems = [
-            (object)[
+            (object) [
                 'post_id' => 1,
-                'value' => 'something'
-            ]
+                'value' => 'something',
+            ],
         ];
 
         $expectation = [
-            (object)[
+            (object) [
                 'ID' => 1,
                 'name' => 'some',
-                'meta' => (object)[
+                'meta' => (object) [
                     'post_id' => 1,
-                    'value' => 'something'
-                ]
+                    'value' => 'something',
+                ],
             ],
-            (object)[
+            (object) [
                 'ID' => 2,
                 'name' => 'some',
-                'meta' => null
-            ]
+                'meta' => null,
+            ],
         ];
 
         $builder = m::mock(Builder::class);

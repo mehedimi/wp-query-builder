@@ -9,7 +9,6 @@ interface Pluggable
     /**
      * Apply that plugin
      *
-     * @param Builder $builder
      * @return mixed
      */
     public function apply(Builder $builder);

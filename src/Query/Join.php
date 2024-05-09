@@ -26,7 +26,7 @@ class Join extends Builder
      * @param  string  $table
      * @param  string  $type
      */
-    public function __construct($table, $type, Connection $connection, ?Grammar $grammar = null)
+    public function __construct($table, $type, Connection $connection, Grammar $grammar = null)
     {
         $this->table = $table;
         $this->type = $type;

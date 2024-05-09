@@ -133,7 +133,7 @@ class Builder
     /**
      * Create a new query builder instance.
      */
-    public function __construct(Connection $connection, ?Grammar $grammar = null)
+    public function __construct(Connection $connection, Grammar $grammar = null)
     {
         $this->connection = $connection;
         $this->grammar = $grammar ?: Grammar::getInstance();

@@ -2,6 +2,11 @@
   "name": "mehedimi/wp-query-builder",
   "description": "A database query builder for WordPress",
   "license": "MIT",
+  "config": {
+    "platform": {
+      "php": "5.6"
+    }
+  },
   "autoload": {
     "psr-4": {
       "Mehedi\\WPQueryBuilder\\": "src/"

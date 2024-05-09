@@ -36,7 +36,7 @@ abstract class Relation
      *
      * @param  string  $name
      */
-    public function __construct($name, ?Builder $builder = null)
+    public function __construct($name, Builder $builder = null)
     {
         $this->name = $name;
         $this->builder = $builder ?: new Builder($this->builder->connection);

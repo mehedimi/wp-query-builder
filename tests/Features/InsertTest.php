@@ -4,6 +4,7 @@ namespace Mehedi\WPQueryBuilderTests\Features;
 
 use Faker\Factory;
 use Mehedi\WPQueryBuilder\Exceptions\QueryException;
+use Throwable;
 
 class InsertTest extends QueryBuilderFeatureTest
 {
@@ -23,7 +24,7 @@ class InsertTest extends QueryBuilderFeatureTest
             'meta_value' => $name,
         ]);
 
-        $this->assertTrue($result);
+        $this->assertEquals(1, $result);
 
         $data = $this->getBuilder()->from('postmeta')->get();
 
@@ -60,7 +61,7 @@ class InsertTest extends QueryBuilderFeatureTest
             ],
         ]);
 
-        $this->assertTrue($result);
+        $this->assertEquals(2, $result);
 
         $data = $this->getBuilder()->from('postmeta')->get();
 
@@ -112,7 +113,7 @@ class InsertTest extends QueryBuilderFeatureTest
             ],
         ]);
 
-        $this->assertTrue($result);
+        $this->assertEquals(2, $result);
 
         $result = $this->getBuilder()->from('postmeta')->insert([
             [
@@ -133,6 +134,31 @@ class InsertTest extends QueryBuilderFeatureTest
         ], true);
 
         $this->assertSame(1, $result);
+    }
+
+    /**
+     * @test
+     */
+    function it_should_return_inserted_row_id()
+    {
+        $this->ifNeedSkip();
+
+        $this->truncate('postmeta');
+        $factory = Factory::create();
+
+        $resultOne = $this->getBuilder()->from('postmeta')->insertGetId([
+            'meta_key' => 'name1',
+            'meta_value' => $factory->name(),
+        ]);
+
+        $this->assertEquals(1, $resultOne);
+
+        $resultTwo = $this->getBuilder()->from('postmeta')->insertGetId([
+            'meta_key' => 'name2',
+            'meta_value' => $factory->name(),
+        ]);
+
+        $this->assertEquals(2, $resultTwo);
     }
 
     /**

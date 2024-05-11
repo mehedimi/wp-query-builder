@@ -6,10 +6,12 @@ use Closure;
 use Exception;
 use Mehedi\WPQueryBuilder\Concerns\ForwardsCalls;
 use Mehedi\WPQueryBuilder\Exceptions\QueryException;
+use Mehedi\WPQueryBuilder\Query\ReturnType;
 use mysqli;
 use mysqli_result;
 use mysqli_sql_exception;
 use mysqli_stmt;
+use function _PHPStan_7961f7ae1\Symfony\Component\String\b;
 
 /**
  * @method bool beginTransaction($flags = 0, $name = null)
@@ -172,13 +174,13 @@ class Connection
     /**
      * Run an insert statement against the database.
      *
-     * @param  string  $query
-     * @param  array<int, mixed>  $bindings
-     * @return bool
+     * @param string $query
+     * @param array<int, mixed> $bindings
+     * @return int|string
      */
     public function insert($query, $bindings = [])
     {
-        return $this->statement($query, $bindings);
+        return $this->affectingStatement($query, $bindings);
     }
 
     /**
@@ -212,7 +214,7 @@ class Connection
      *
      * @param  string  $query
      * @param  array<int, mixed>  $bindings
-     * @return int
+     * @return int|string
      */
     public function update($query, $bindings = [])
     {
@@ -222,13 +224,14 @@ class Connection
     /**
      * Run an SQL statement and get the number of rows affected.
      *
-     * @param  string  $query
-     * @param  array<int, mixed>  $bindings
-     * @return int
+     * @param string $query
+     * @param array<int, mixed> $bindings
+     * @param int $returnType
+     * @return int|string
      */
-    public function affectingStatement($query, $bindings = [])
+    public function affectingStatement($query, $bindings = [], $returnType = ReturnType::AFFECTED_ROW)
     {
-        return $this->run($query, $bindings, function ($query, $bindings) {
+        return $this->run($query, $bindings, function ($query, $bindings) use ($returnType) {
             // For update or delete statements, we want to get the number of rows affected
             // by the statement and return that back to the developer. We'll first need
             // to execute the statement, and then we'll use affected_rows property of mysqli_stmt.
@@ -244,9 +247,17 @@ class Connection
 
             $this->bindValues($statement, $bindings);
 
-            $statement->execute();
+            $bool = $statement->execute();
 
-            return $statement->affected_rows;
+            if ($returnType === ReturnType::AFFECTED_ROW) {
+                return $statement->affected_rows;
+            }
+
+            if ($returnType === ReturnType::INSERT_ID) {
+                return $statement->insert_id;
+            }
+
+            return  $bool;
         });
     }
 
@@ -255,7 +266,7 @@ class Connection
      *
      * @param  string  $query
      * @param  array<int, mixed>  $bindings
-     * @return int
+     * @return int|string
      */
     public function delete($query, $bindings = [])
     {

@@ -361,7 +361,7 @@ class Builder
      */
     public function orWhere($column, $operator = null, $value = null)
     {
-        [$value, $operator] = $this->prepareValueAndOperator(
+        list($value, $operator) = $this->prepareValueAndOperator(
             $value,
             $operator,
             func_num_args() === 2
@@ -422,7 +422,7 @@ class Builder
         // Here we will make some assumptions about the operator. If only 2 values are
         // passed to the method, we will assume that the operator is an equals sign
         // and keep going. Otherwise, we'll require the operator to be passed in.
-        [$value, $operator] = $this->prepareValueAndOperator(
+        list($value, $operator) = $this->prepareValueAndOperator(
             $value, // @phpstan-ignore-line
             $operator, // @phpstan-ignore-line
             func_num_args() === 2
@@ -573,7 +573,7 @@ class Builder
      *
      * @param  array<int|string, mixed>  $values
      * @param  bool  $ignore
-     * @return bool|int
+     * @return bool|int|string
      */
     public function insert(array $values, $ignore = false)
     {
@@ -598,11 +598,28 @@ class Builder
             ->insert($query, $payload);
     }
 
+
+    /**
+     * Insert new record and returns its ID
+     *
+     * @param array<string, mixed> $values
+     * @return int|string
+     */
+    public function insertGetId(array $values)
+    {
+        return $this
+            ->connection
+            ->affectingStatement(
+                $this->grammar->compileInsert($this, [$values], false), array_values($values),
+                ReturnType::INSERT_ID
+            );
+    }
+
     /**
      * Update records in the database.
      *
      * @param  array<string, mixed>  $values
-     * @return int
+     * @return int|string
      */
     public function update(array $values)
     {
@@ -617,7 +634,7 @@ class Builder
     /**
      * Delete records from the database.
      *
-     * @return int
+     * @return int|string
      */
     public function delete()
     {
@@ -654,7 +671,7 @@ class Builder
     {
         $type = 'Column';
 
-        [$second, $operator] = $this->prepareValueAndOperator(
+        list($second, $operator) = $this->prepareValueAndOperator(
             $second, // @phpstan-ignore-line
             $operator, // @phpstan-ignore-line
             func_num_args() === 2
@@ -830,7 +847,7 @@ class Builder
      *
      * @return $this
      */
-    public function withRelation(Relation $relation, ?callable $callback = null)
+    public function withRelation(Relation $relation, callable $callback = null)
     {
         if (! is_null($callback)) {
             call_user_func($callback, $relation);

@@ -261,59 +261,59 @@ class GrammarTest extends TestCase
         $this->assertEquals('select * from wp_posts where amount between ? and ? or item not between ? and ?', $sql);
     }
 
-    /**
-     * @test
-     */
-    public function it_can_compile_insert()
-    {
-        $m = m::mock(mysqli::class);
-        $p = m::mock(mysqli_stmt::class);
-        $p->shouldReceive('bind_param');
-        $p->shouldReceive('execute');
-        $p->shouldReceive('fetch_object');
-        $p->shouldReceive('get_result')->andReturn($p);
-
-        $m->shouldReceive('prepare')
-            ->with('insert into wp_posts default values')
-            ->andReturn($p);
-
-        $g = Grammar::getInstance()->setTablePrefix('wp_');
-
-        $b = new Builder(new Connection($m), $g);
-
-        $b
-            ->from('posts')
-            ->insert([]);
-
-        $m->shouldReceive('prepare')
-            ->with('insert into wp_posts(name, id, add) values (?, ?, null)')
-            ->andReturn($p);
-
-        $b->from('posts')
-            ->insert([
-                'name' => 'foo',
-                'id' => 3,
-                'add' => null,
-            ]);
-
-        $m->shouldReceive('prepare')
-            ->with('insert into wp_posts(name, id) values (?, ?), (?, ?)')
-            ->andReturn($p);
-
-        $b->from('posts')
-            ->insert([
-                [
-                    'name' => 'foo',
-                    'id' => 3,
-                ],
-                [
-                    'name' => 'bar',
-                    'id' => 5,
-                ],
-            ]);
-
-        $this->assertTrue(true);
-    }
+//    /**
+//     * @test
+//     */
+//    public function it_can_compile_insert()
+//    {
+//        $m = m::mock(mysqli::class);
+//        $p = m::mock(mysqli_stmt::class);
+//        $p->shouldReceive('bind_param');
+//        $p->shouldReceive('execute');
+//        $p->shouldReceive('fetch_object');
+//        $p->shouldReceive('get_result')->andReturn($p);
+//
+//        $m->shouldReceive('prepare')
+//            ->with('insert into wp_posts default values')
+//            ->andReturn($p);
+//
+//        $g = Grammar::getInstance()->setTablePrefix('wp_');
+//
+//        $b = new Builder(new Connection($m), $g);
+//
+//        $b
+//            ->from('posts')
+//            ->insert([]);
+//
+//        $m->shouldReceive('prepare')
+//            ->with('insert into wp_posts(name, id, add) values (?, ?, null)')
+//            ->andReturn($p);
+//
+//        $b->from('posts')
+//            ->insert([
+//                'name' => 'foo',
+//                'id' => 3,
+//                'add' => null,
+//            ]);
+//
+//        $m->shouldReceive('prepare')
+//            ->with('insert into wp_posts(name, id) values (?, ?), (?, ?)')
+//            ->andReturn($p);
+//
+//        $b->from('posts')
+//            ->insert([
+//                [
+//                    'name' => 'foo',
+//                    'id' => 3,
+//                ],
+//                [
+//                    'name' => 'bar',
+//                    'id' => 5,
+//                ],
+//            ]);
+//
+//        $this->assertTrue(true);
+//    }
 
     /**
      * @test

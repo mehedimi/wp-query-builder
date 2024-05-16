@@ -582,7 +582,7 @@ class Builder
         }
 
         $payload = array_reduce($values, function ($values, $value) {
-            return array_merge($values, array_values(array_filter($value)));
+            return array_merge($values, array_values($value));
         }, []);
 
         $query = $this->grammar->compileInsert($this, $values, $ignore);

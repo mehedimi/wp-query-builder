@@ -6,10 +6,8 @@ class WithOne extends WithOneOrMany
 {
     /**
      * Loaded items with under its foreign key
-     *
-     * @return array<string|int, object>
      */
-    protected function loadedItemsDictionary()
+    protected function loadedItemsDictionary(): array
     {
         $items = [];
         $loadedItems = $this->getLoadedItems();
@@ -22,14 +20,12 @@ class WithOne extends WithOneOrMany
     }
 
     /**
-     * Get mapped value from dictionary
-     *
-     * @return object|null
+     * Get mapped value from the dictionary
      */
-    protected function getItemFromDictionary($loadedItems, $item)
+    protected function getItemFromDictionary(array $loadedItems, object $item)
     {
-        if (array_key_exists($item->{$this->localKey}, $loadedItems)) {
-            return $loadedItems[$item->{$this->localKey}]; // @phpstan-ignore-line
+        if (isset($loadedItems[$item->{$this->localKey}])) {
+            return $loadedItems[$item->{$this->localKey}];
         }
 
         return null;

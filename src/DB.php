@@ -29,18 +29,13 @@ class DB
 
     /**
      * Single connection instance
-     *
-     * @var Connection|null
      */
-    protected static $connection;
+    protected static ?Connection $connection;
 
     /**
      * Set the table which the query is targeting.
-     *
-     * @param  string  $table
-     * @return Builder
      */
-    public static function table($table)
+    public static function table(string $table): Builder
     {
         return (new Builder(self::getConnection()))
             ->from($table);
@@ -48,10 +43,8 @@ class DB
 
     /**
      * Get the database connection from `$wpdb`
-     *
-     * @return Connection
      */
-    public static function getConnection()
+    public static function getConnection(): Connection
     {
         if (is_null(self::$connection)) {
             global $wpdb;
@@ -64,10 +57,8 @@ class DB
 
     /**
      * Apply a mixin to builder class
-     *
-     * @return Builder
      */
-    public static function plugin(Pluggable $plugin)
+    public static function plugin(Pluggable $plugin): Builder
     {
         return (new Builder(self::getConnection()))->plugin($plugin);
     }
@@ -75,11 +66,10 @@ class DB
     /**
      * Handle dynamic method calling
      *
-     * @param  string  $name
      * @param  array<int>  $arguments
      * @return Builder
      */
-    public static function __callStatic($name, $arguments)
+    public static function __callStatic(string $name, array $arguments)
     {
         return self::forwardCallTo(self::getConnection(), $name, $arguments);
     }

@@ -18,10 +18,13 @@ WP Query Builder is package for developers, which can simplify query writing exp
     - [Ordering](#ordering)
     - [Grouping](#grouping)
     - [Limit & Offset](#limit-and-offset)
+- [Truncating Tables](#truncating-tables)
+- [Plugins](#plugins)
 - [Database Transactions](#database-transactions)
 - [Defining Relationships (On Demand)](#defining-relationships)
     - [One To One](#one-to-one)
     - [One To Many](#one-to-many)
+    - [Custom Relations](#custom-relations)
 
 <a name="introduction"></a>
 
@@ -63,6 +66,12 @@ the SQL query as its first argument and bindings as its second argument:
 
 ```php
 DB::insert('insert into users (id, name) values (?, ?)', [1, 'Username']);
+```
+
+If you need to get the last inserted ID, you may use the `insertGetId` method:
+
+```php
+$id = DB::table('users')->insertGetId(['name' => 'Username']);
 ```
 
 <a name="running-an-update-statement"></a>
@@ -443,11 +452,12 @@ $users = DB::table('users')
 
 #### The `groupBy` Method
 
-As you might expect, the `groupBy` method may be used to group the query results:
+As you might expect, the `groupBy` method may be used to group the query results. You may also pass a second argument
+to specify the direction:
 
 ```php
 $users = DB::table('users')
-                ->groupBy('account_id')
+                ->groupBy('account_id', 'desc')
                 ->get();
 ```
 
@@ -464,6 +474,36 @@ $users = DB::table('users')
                 ->limit(5)
                 ->get();
 ```
+
+The `skip` method is an alias for the `offset` method:
+
+```php
+$users = DB::table('users')
+                ->skip(10)
+                ->limit(5)
+                ->get();
+```
+
+<a name="truncating-tables"></a>
+
+## Truncating Tables
+
+The `truncate` method may be used to delete all rows from a table and reset the auto-increment ID to zero:
+
+```php
+DB::table('users')->truncate();
+```
+
+<a name="plugins"></a>
+
+## Plugins
+
+The `plugin` method may be used to apply a mixin to the query builder class. The plugin must implement the `Mehedi\WPQueryBuilder\Contracts\Pluggable` interface:
+
+```php
+DB::table('users')->plugin(new MyPlugin())->get();
+```
+
 <a name="database-transactions"></a>
 ## Database Transactions
 
@@ -602,4 +642,16 @@ And execute following two queries
 ```sql
 select * from posts
 select * from comments where comment_post_ID in (1, 2)
+```
+
+<a name="custom-relations"></a>
+
+### Custom Relations
+
+If you have a custom relation class that extends `Mehedi\WPQueryBuilder\Relations\Relation`, you may use the `withRelation` method:
+
+```php
+DB::table('posts')->withRelation(new MyRelation('name', 'foreign_key', 'local_key', $query), function($relation) {
+    // optional callback
+})->get();
 ```

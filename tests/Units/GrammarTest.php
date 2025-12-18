@@ -261,59 +261,59 @@ class GrammarTest extends TestCase
         $this->assertEquals('select * from wp_posts where amount between ? and ? or item not between ? and ?', $sql);
     }
 
-//    /**
-//     * @test
-//     */
-//    public function it_can_compile_insert()
-//    {
-//        $m = m::mock(mysqli::class);
-//        $p = m::mock(mysqli_stmt::class);
-//        $p->shouldReceive('bind_param');
-//        $p->shouldReceive('execute');
-//        $p->shouldReceive('fetch_object');
-//        $p->shouldReceive('get_result')->andReturn($p);
-//
-//        $m->shouldReceive('prepare')
-//            ->with('insert into wp_posts default values')
-//            ->andReturn($p);
-//
-//        $g = Grammar::getInstance()->setTablePrefix('wp_');
-//
-//        $b = new Builder(new Connection($m), $g);
-//
-//        $b
-//            ->from('posts')
-//            ->insert([]);
-//
-//        $m->shouldReceive('prepare')
-//            ->with('insert into wp_posts(name, id, add) values (?, ?, null)')
-//            ->andReturn($p);
-//
-//        $b->from('posts')
-//            ->insert([
-//                'name' => 'foo',
-//                'id' => 3,
-//                'add' => null,
-//            ]);
-//
-//        $m->shouldReceive('prepare')
-//            ->with('insert into wp_posts(name, id) values (?, ?), (?, ?)')
-//            ->andReturn($p);
-//
-//        $b->from('posts')
-//            ->insert([
-//                [
-//                    'name' => 'foo',
-//                    'id' => 3,
-//                ],
-//                [
-//                    'name' => 'bar',
-//                    'id' => 5,
-//                ],
-//            ]);
-//
-//        $this->assertTrue(true);
-//    }
+    //    /**
+    //     * @test
+    //     */
+    //    public function it_can_compile_insert()
+    //    {
+    //        $m = m::mock(mysqli::class);
+    //        $p = m::mock(mysqli_stmt::class);
+    //        $p->shouldReceive('bind_param');
+    //        $p->shouldReceive('execute');
+    //        $p->shouldReceive('fetch_object');
+    //        $p->shouldReceive('get_result')->andReturn($p);
+    //
+    //        $m->shouldReceive('prepare')
+    //            ->with('insert into wp_posts default values')
+    //            ->andReturn($p);
+    //
+    //        $g = Grammar::getInstance()->setTablePrefix('wp_');
+    //
+    //        $b = new Builder(new Connection($m), $g);
+    //
+    //        $b
+    //            ->from('posts')
+    //            ->insert([]);
+    //
+    //        $m->shouldReceive('prepare')
+    //            ->with('insert into wp_posts(name, id, add) values (?, ?, null)')
+    //            ->andReturn($p);
+    //
+    //        $b->from('posts')
+    //            ->insert([
+    //                'name' => 'foo',
+    //                'id' => 3,
+    //                'add' => null,
+    //            ]);
+    //
+    //        $m->shouldReceive('prepare')
+    //            ->with('insert into wp_posts(name, id) values (?, ?), (?, ?)')
+    //            ->andReturn($p);
+    //
+    //        $b->from('posts')
+    //            ->insert([
+    //                [
+    //                    'name' => 'foo',
+    //                    'id' => 3,
+    //                ],
+    //                [
+    //                    'name' => 'bar',
+    //                    'id' => 5,
+    //                ],
+    //            ]);
+    //
+    //        $this->assertTrue(true);
+    //    }
 
     /**
      * @test
@@ -467,6 +467,33 @@ class GrammarTest extends TestCase
         $this->assertEquals(
             'insert ignore into wp_posts(name) values (?)',
             Grammar::getInstance()->compileInsert($b, [['name' => 'h']], true)
+        );
+    }
+
+    /**
+     * @test
+     */
+    public function it_should_skip_null_params_binding()
+    {
+        Grammar::getInstance()->setTablePrefix('wp_');
+
+        $b = new Builder(new Connection(m::mock(mysqli::class)), Grammar::getInstance());
+
+        $b->from('posts');
+
+        $data = [
+            'name' => 'h',
+            'id' => null,
+        ];
+
+        $this->assertEquals(
+            'insert ignore into wp_posts(name, id) values (?, null)',
+            Grammar::getInstance()->compileInsert($b, [$data], true)
+        );
+
+        $this->assertEquals(
+            'update wp_posts set name = ?, id = null',
+            Grammar::getInstance()->compileUpdate($b, $data)
         );
     }
 }

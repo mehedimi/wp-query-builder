@@ -10,13 +10,12 @@ trait ForwardsCalls
      * Forward a method call to the given object.
      *
      * @param  mixed  $object
-     * @param  string  $method
      * @param  array<int, mixed>  $parameters
      * @return mixed
      *
      * @throws BadMethodCallException
      */
-    protected static function forwardCallTo($object, $method, $parameters)
+    protected static function forwardCallTo($object, string $method, array $parameters)
     {
         try {
             return $object->{$method}(...$parameters);
@@ -39,12 +38,11 @@ trait ForwardsCalls
     /**
      * Throw a bad method call exception for the given method.
      *
-     * @param  string  $method
      * @return void
      *
      * @throws BadMethodCallException
      */
-    protected static function throwBadMethodCallException($method)
+    protected static function throwBadMethodCallException(string $method)
     {
         throw new BadMethodCallException(sprintf(
             'Call to undefined method %s::%s()',

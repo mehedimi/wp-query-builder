@@ -9,7 +9,7 @@ class WithMany extends WithOneOrMany
      *
      * @return array<string, array<int, object>>
      */
-    protected function loadedItemsDictionary()
+    protected function loadedItemsDictionary(): array
     {
         $items = [];
         $loadedItems = $this->getLoadedItems();
@@ -18,17 +18,13 @@ class WithMany extends WithOneOrMany
             $items[$loadedItem->{$this->foreignKey}][] = $loadedItem;
         }
 
-        return $items; // @phpstan-ignore-line
+        return $items;
     }
 
     /**
-     * Get mapped values from dictionary
-     *
-     * @param  array<string|int, array<int, object>>  $loadedItems
-     * @param  object  $item
-     * @return array<int, object>
+     * Get mapped values from a dictionary
      */
-    protected function getItemFromDictionary($loadedItems, $item)
+    protected function getItemFromDictionary(array $loadedItems, object $item)
     {
         if (array_key_exists($item->{$this->localKey}, $loadedItems)) {
             return $loadedItems[$item->{$this->localKey}];

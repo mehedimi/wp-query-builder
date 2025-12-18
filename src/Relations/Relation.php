@@ -13,30 +13,24 @@ abstract class Relation
     use ForwardsCalls;
 
     /**
-     * The name of relation
-     *
-     * @var string
+     * The name of the relation
      */
-    protected $name;
+    protected string $name;
 
     /**
      * The query builder instance
-     *
-     * @var Builder
      */
-    protected $builder;
+    protected Builder $builder;
 
     /**
      * @var array<int, object>
      */
-    protected $items;
+    protected array $items;
 
     /**
      * Constructor of Relation Class
-     *
-     * @param  string  $name
      */
-    public function __construct($name, Builder $builder = null)
+    public function __construct(string $name, ?Builder $builder = null)
     {
         $this->name = $name;
         $this->builder = $builder ?: new Builder($this->builder->connection);
@@ -47,7 +41,7 @@ abstract class Relation
      *
      * @return array<int, object>
      */
-    public function load()
+    public function load(): array
     {
         $loadedItems = $this->loadedItemsDictionary();
 
@@ -63,16 +57,15 @@ abstract class Relation
      *
      * @return array<string|int, object | array<int, object>>
      */
-    abstract protected function loadedItemsDictionary();
+    abstract protected function loadedItemsDictionary(): array;
 
     /**
-     * Get mapped value from dictionary
+     * Get mapped value from the dictionary
      *
      * @param  array<string, object | array<int, object>>  $loadedItems
-     * @param  object  $item
      * @return object|null | array<int, object>
      */
-    abstract protected function getItemFromDictionary($loadedItems, $item);
+    abstract protected function getItemFromDictionary(array $loadedItems, object $item);
 
     /**
      * Set items of record
@@ -80,7 +73,7 @@ abstract class Relation
      * @param  array<int, object>  $items
      * @return $this
      */
-    public function setItems(array $items)
+    public function setItems(array $items): Relation
     {
         $this->items = $items;
 
@@ -90,11 +83,10 @@ abstract class Relation
     /**
      * Handle dynamic methods call of query builder
      *
-     * @param  string  $name
      * @param  array<int, string>  $arguments
      * @return Builder
      */
-    public function __call($name, $arguments)
+    public function __call(string $name, array $arguments)
     {
         if ($name === 'get') {
             self::throwBadMethodCallException($name);
@@ -108,5 +100,5 @@ abstract class Relation
      *
      * @return array<int, object>
      */
-    abstract protected function getLoadedItems();
+    abstract protected function getLoadedItems(): array;
 }

@@ -8,17 +8,13 @@ class Join extends Builder
 {
     /**
      * The type of join being performed.
-     *
-     * @var string
      */
-    public $type;
+    public string $type;
 
     /**
      * The table the join clause is joining to.
-     *
-     * @var string
      */
-    public $table;
+    public string $table;
 
     /**
      * Create a new join clause instance.
@@ -26,7 +22,7 @@ class Join extends Builder
      * @param  string  $table
      * @param  string  $type
      */
-    public function __construct($table, $type, Connection $connection, Grammar $grammar = null)
+    public function __construct($table, $type, Connection $connection, ?Grammar $grammar = null)
     {
         $this->table = $table;
         $this->type = $type;
@@ -36,27 +32,16 @@ class Join extends Builder
 
     /**
      * Add an "or on" clause to the join.
-     *
-     * @param  string  $first
-     * @param  string|null  $operator
-     * @param  string|null  $second
-     * @return Join
      */
-    public function orOn($first, $operator = null, $second = null)
+    public function orOn(string $first, ?string $operator = null, ?string $second = null): Join
     {
         return $this->on($first, $operator, $second, 'or');
     }
 
     /**
      * Add an "on" clause to the join.
-     *
-     * @param  string  $first
-     * @param  string|null  $operator
-     * @param  string|null  $second
-     * @param  string  $boolean
-     * @return Join
      */
-    public function on($first, $operator = null, $second = null, $boolean = 'and')
+    public function on(string $first, ?string $operator = null, ?string $second = null, string $boolean = 'and'): Join
     {
         return $this->whereColumn($first, $operator, $second, $boolean);
     }

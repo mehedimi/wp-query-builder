@@ -4,7 +4,6 @@ namespace Mehedi\WPQueryBuilderTests\Features;
 
 use Faker\Factory;
 use Mehedi\WPQueryBuilder\Exceptions\QueryException;
-use Throwable;
 
 class InsertTest extends QueryBuilderFeatureTest
 {
@@ -139,7 +138,7 @@ class InsertTest extends QueryBuilderFeatureTest
     /**
      * @test
      */
-    function it_should_return_inserted_row_id()
+    public function it_should_return_inserted_row_id()
     {
         $this->ifNeedSkip();
 

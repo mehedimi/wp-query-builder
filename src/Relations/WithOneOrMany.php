@@ -8,24 +8,18 @@ abstract class WithOneOrMany extends Relation
 {
     /**
      * Foreign key of the parent table
-     *
-     * @var string
      */
-    protected $foreignKey;
+    protected string $foreignKey;
 
     /**
      * Local key of the parent table
-     *
-     * @var string
      */
-    protected $localKey;
+    protected string $localKey;
 
     /**
-     * @param  string  $name
      * @param  string  $foreignKey
-     * @param  string  $localKey
      */
-    public function __construct($name, $foreignKey, $localKey, Builder $builder)
+    public function __construct(string $name, $foreignKey, string $localKey, Builder $builder)
     {
         $this->foreignKey = $foreignKey;
         $this->localKey = $localKey;
@@ -38,7 +32,7 @@ abstract class WithOneOrMany extends Relation
      *
      * @return array<int, object>
      */
-    protected function getLoadedItems()
+    protected function getLoadedItems(): array
     {
         return $this->builder->whereIn($this->foreignKey, $this->extractKeyValues())->get();
     }
@@ -48,7 +42,7 @@ abstract class WithOneOrMany extends Relation
      *
      * @return array<int, string>
      */
-    protected function extractKeyValues()
+    protected function extractKeyValues(): array
     {
         return array_column($this->items, $this->localKey);
     }

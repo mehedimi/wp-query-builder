@@ -4,6 +4,4 @@ namespace Mehedi\WPQueryBuilder\Exceptions;
 
 use Exception;
 
-class QueryException extends Exception
-{
-}
+class QueryException extends Exception {}

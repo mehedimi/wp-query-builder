@@ -9,7 +9,7 @@ class WithMany extends WithOneOrMany
      *
      * @return array<string, array<int, object>>
      */
-    protected function loadedItemsDictionary(): array
+    protected function loadedItemsDictionary(): array // @phpstan-ignore-line
     {
         $items = [];
         $loadedItems = $this->getLoadedItems();

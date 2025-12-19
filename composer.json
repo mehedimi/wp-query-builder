@@ -38,7 +38,7 @@
     "test": "phpunit --testdox",
     "test:units": "phpunit --filter=Units --testdox",
     "test:features": "RUN_FEATURE_TEST=on phpunit --filter=Features --testdox",
-    "check": "vendor/bin/phpstan analyse -c phpstan.neon",
+    "lint": "vendor/bin/phpstan analyse -c phpstan.neon",
     "pre-commit": "composer check && composer test",
     "fmt": "./vendor/bin/pint"
   }

@@ -30,7 +30,7 @@ class DB
     /**
      * Single connection instance
      */
-    protected static ?Connection $connection;
+    protected static Connection $connection;
 
     /**
      * Set the table which the query is targeting.
@@ -46,7 +46,7 @@ class DB
      */
     public static function getConnection(): Connection
     {
-        if (is_null(self::$connection)) {
+        if (! isset(self::$connection)) {
             global $wpdb;
             self::$connection = new Connection($wpdb->__get('dbh'));
             Grammar::getInstance()->setTablePrefix($wpdb->prefix);

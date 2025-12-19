@@ -46,7 +46,7 @@ abstract class Relation
         $loadedItems = $this->loadedItemsDictionary();
 
         return array_map(function ($item) use (&$loadedItems) {
-            $item->{$this->name} = $this->getItemFromDictionary($loadedItems, $item); // @phpstan-ignore-line
+            $item->{$this->name} = $this->getItemFromDictionary($loadedItems, $item);
 
             return $item;
         }, $this->items);
@@ -55,14 +55,14 @@ abstract class Relation
     /**
      * Loaded items with under its foreign key
      *
-     * @return array<string|int, object | array<int, object>>
+     * @return array<string, object>
      */
     abstract protected function loadedItemsDictionary(): array;
 
     /**
      * Get mapped value from the dictionary
      *
-     * @param  array<string, object | array<int, object>>  $loadedItems
+     * @param  array<string, object>  $loadedItems
      * @return object|null | array<int, object>
      */
     abstract protected function getItemFromDictionary(array $loadedItems, object $item);
